@@ -1,0 +1,2373 @@
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pembuatan Modul Ajar Otomatis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link type="text/css" rel="stylesheet" id="dark-mode-custom-link" />
+    <link type="text/css" rel="stylesheet" id="dark-mode-general-link" />
+    <style lang="en" type="text/css" id="dark-mode-custom-style"></style>
+    <style lang="en" type="text/css" id="dark-mode-native-style"></style>
+    <style lang="en" type="text/css" id="dark-mode-native-sheet"></style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --primary: #b8860b; /* Dark Golden Yellow */
+        --primary-light: #d4a017;
+        --primary-dark: #8b6508;
+        --secondary: #a67c00;
+        --secondary-light: #c9a227;
+        --accent: #e6b800;
+        --danger: #c0392b;
+        --bg-dark: #ffffff;
+        --bg-card: #ffffff;
+        --bg-input: #fff9e6;
+        --text-primary: #2c2c2c;
+        --text-secondary: #6b7280;
+        --border: #e5e7eb;
+        --glass: rgba(184, 134, 11, 0.05);
+        --shadow: 0 15px 40px rgba(184, 134, 11, 0.15);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: linear-gradient(135deg, #ffffff 0%, #fff8dc 100%);
+        min-height: 100vh;
+        color: var(--text-primary);
+        overflow-x: hidden;
+      }
+
+      /* Animated Background */
+      .bg-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+      }
+
+      .bg-animation::before {
+      content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+          radial-gradient(circle at 20% 80%, rgba(184, 134, 11, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(212, 160, 23, 0.12) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(230, 184, 0, 0.1) 0%, transparent 40%);
+        animation: bgRotate 30s linear infinite;
+      }
+
+      @keyframes bgRotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .floating-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.4;
+        animation: floatOrb 8s ease-in-out infinite;
+      }
+
+      .orb-1 {
+        width: 300px;
+        height: 300px;
+        background: var(--primary);
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+
+      .orb-2 {
+        width: 250px;
+        height: 250px;
+        background: var(--secondary);
+        top: 60%;
+        right: 10%;
+        animation-delay: 2s;
+      }
+
+      .orb-3 {
+        width: 200px;
+        height: 200px;
+        background: var(--accent);
+        bottom: 20%;
+        left: 30%;
+        animation-delay: 4s;
+      }
+
+      @keyframes floatOrb {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        33% {
+          transform: translate(30px, -30px) scale(1.05);
+        }
+        66% {
+          transform: translate(-20px, 20px) scale(0.95);
+        }
+      }
+
+      /* Container */
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px 20px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .logo-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        box-shadow: 0 8px 32px rgba(79, 70, 229, 0.4);
+      }
+
+      .logo-text {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--text-primary), var(--primary-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+
+      /* Progress Bar */
+      .progress-container {
+        background: var(--bg-card);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 24px 32px;
+        margin-bottom: 30px;
+        border: 1px solid var(--border);
+      }
+
+      .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+      }
+
+      .progress-steps::before {
+        content: "";
+        position: absolute;
+        top: 24px;
+        left: 40px;
+        right: 40px;
+        height: 3px;
+        background: var(--bg-input);
+        border-radius: 2px;
+      }
+
+      .progress-line {
+        position: absolute;
+        top: 24px;
+        left: 40px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        border-radius: 2px;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .step-item:hover {
+        transform: translateY(-2px);
+      }
+
+      .step-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--bg-input);
+        border: 3px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+
+      .step-circle::after {
+        content: "";
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        transition: border-color 0.3s ease;
+      }
+
+      .step-item.active .step-circle {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        border-color: transparent;
+        box-shadow: 0 0 30px rgba(79, 70, 229, 0.5);
+      }
+
+      .step-item.active .step-circle::after {
+        border-color: var(--primary-light);
+      }
+
+      .step-item.completed .step-circle {
+        background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+        border-color: transparent;
+      }
+
+      .step-item.completed .step-circle::before {
+        content: "✓";
+        font-size: 1.2rem;
+      }
+
+      .step-item.completed .step-number {
+        display: none;
+      }
+
+      .step-label {
+        margin-top: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        transition: color 0.3s ease;
+        text-align: center;
+        max-width: 100px;
+      }
+
+      .step-item.active .step-label,
+      .step-item.completed .step-label {
+        color: var(--text-primary);
+      }
+
+      /* Form Card */
+      .form-card {
+       background: #ffffff;
+        border-radius: 24px;
+        padding: 40px;
+        border: 1px solid #f3e6c4;
+        box-shadow: var(--shadow);
+        margin-bottom: 30px;
+      }
+
+      .step-content {
+        display: none;
+        animation: fadeIn 0.5s ease;
+      }
+
+      .step-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .step-header {
+        text-align: center;
+        margin-bottom: 35px;
+      }
+
+      .step-header h2 {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .step-header h2 .header-icon {
+        font-size: 2rem;
+        display: inline-block;
+      }
+
+      .step-header h2 .header-text {
+        background: linear-gradient(135deg, var(--text-primary), var(--primary-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .step-header p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      /* Form Elements */
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+      }
+
+      .form-group {
+        position: relative;
+      }
+
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      .form-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+      }
+
+      .form-group label .icon {
+        font-size: 1.1rem;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 16px 18px;
+        background: var(--bg-input);
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input::placeholder,
+      .form-group textarea::placeholder {
+        color: var(--text-secondary);
+        font-weight: 400;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(79, 70, 229, 0.1);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+      }
+
+      .form-group select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        padding-right: 48px;
+      }
+
+      /* FIXED: Dropdown styling with visible icons */
+      .form-group select option {
+       
+        color: #000000;
+        padding: 12px 16px;
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      .form-group select optgroup {
+        font-weight: 700;
+        font-style: normal;
+        font-size: 13px;
+        padding: 10px 0;
+      }
+
+      .form-group select optgroup option {
+        color: #000000;
+        font-weight: 500;
+        padding-left: 12px;
+      }
+
+      .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      /* Multi-select Display */
+      .selected-items-container {
+        margin-top: 12px;
+        min-height: 48px;
+        background: rgba(79, 70, 229, 0.1);
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px dashed var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .selected-item-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        animation: tagIn 0.3s ease;
+      }
+
+      @keyframes tagIn {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .selected-item-tag .remove-tag {
+        width: 20px;
+        height: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s ease;
+      }
+
+      .selected-item-tag .remove-tag:hover {
+        background: var(--danger);
+      }
+
+      .empty-selection {
+        color: var(--text-secondary);
+        font-style: italic;
+        font-size: 0.9rem;
+      }
+
+      /* Checkbox Container */
+      .checkbox-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(16, 185, 129, 0.1));
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .checkbox-wrapper:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+      }
+
+      .checkbox-wrapper input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        accent-color: var(--primary);
+        cursor: pointer;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      .checkbox-content h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .checkbox-content p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      /* Navigation Buttons */
+      .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 35px;
+        padding-top: 25px;
+        border-top: 1px solid var(--border);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 32px;
+        border-radius: 14px;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .btn-secondary {
+        background: var(--bg-input);
+        color: var(--text-primary);
+        border: 2px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(148, 163, 184, 0.2);
+        border-color: var(--text-secondary);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        box-shadow: 0 8px 24px rgba(184, 134, 11, 0.3);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px);
+       box-shadow: 0 8px 24px rgba(184, 134, 11, 0.3);
+      }
+
+      .btn-generate {
+        background: linear-gradient(135deg, var(--secondary), #059669);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        padding: 18px 40px;
+        font-size: 1.1rem;
+      }
+
+      .btn-generate:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(16, 185, 129, 0.5);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      /* Review Section */
+      .review-grid {
+        display: grid;
+        gap: 20px;
+      }
+
+      .review-section {
+        background: rgba(79, 70, 229, 0.05);
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid var(--border);
+      }
+
+      .review-section h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .review-item {
+        display: flex;
+        margin-bottom: 12px;
+      }
+
+      .review-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .review-label {
+        width: 180px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        flex-shrink: 0;
+      }
+
+      .review-value {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .review-value.empty {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+
+      /* ENHANCED Loading State with Progress */
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .loading-overlay.active {
+        display: flex;
+      }
+
+      .loading-container {
+        text-align: center;
+        max-width: 400px;
+        padding: 40px;
+      }
+
+      .loading-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        animation: bounce 1s ease-in-out infinite;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .loading-title {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+
+      .loading-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-bottom: 30px;
+      }
+
+      /* Progress Bar */
+      .progress-bar-container {
+        width: 100%;
+        height: 12px;
+        background: var(--bg-input);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        position: relative;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+        background-size: 200% 100%;
+        border-radius: 6px;
+        transition: width 0.3s ease;
+        animation: shimmer 2s linear infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      .progress-percentage {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+      }
+
+      .progress-status {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        min-height: 24px;
+      }
+
+      .loading-tips {
+        margin-top: 30px;
+        padding: 16px;
+        background: rgba(79, 70, 229, 0.1);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+
+      .loading-tips p {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        line-height: 1.5;
+      }
+
+      .loading-tips strong {
+        color: var(--primary-light);
+      }
+
+      /* Result Section */
+      .result-section {
+        display: none;
+        margin-top: 40px;
+      }
+
+      .result-section.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+      }
+
+      .result-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .btn-export {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+      }
+
+      .btn-export:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(239, 68, 68, 0.4);
+      }
+
+      .btn-regenerate {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+      }
+
+      .btn-regenerate:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(139, 92, 246, 0.4);
+      }
+
+      .btn-new {
+        background: linear-gradient(135deg, var(--accent), #d97706);
+        color: white;
+        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+      }
+
+      .btn-new:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(245, 158, 11, 0.4);
+      }
+
+      /* IMPROVED Result Content with Better Tables */
+      .result-content {
+        background: #ffffff;
+        color: #1e293b;
+        padding: 50px;
+        border-radius: 20px;
+        line-height: 1.7;
+        box-shadow: var(--shadow);
+        font-family: "Times New Roman", serif;
+        font-size: 12pt;
+      }
+
+      .result-content h1 {
+        font-size: 16pt;
+        font-weight: bold;
+        text-align: center;
+        margin: 20px 0;
+        color: #000;
+        text-transform: uppercase;
+      }
+
+      .result-content h2 {
+        font-size: 14pt;
+      font-weight: bold;
+      margin: 24px 0 14px 0;
+      color: #8b6508;
+      text-transform: uppercase;
+      border-bottom: 2px solid #b8860b;
+      padding-bottom: 8px;
+      }
+
+      .result-content h3 {
+        font-size: 12pt;
+        font-weight: bold;
+        margin: 18px 0 10px 0;
+        color: #1e3a5f;
+      }
+
+      .result-content h4 {
+        font-size: 12pt;
+        font-weight: bold;
+        margin: 14px 0 8px 0;
+        color: #374151;
+        background: #f0f4f8;
+        padding: 8px 12px;
+        border-left: 4px solid #4f46e5;
+      }
+
+      .result-content p {
+        margin-bottom: 10px;
+        text-align: justify;
+      }
+
+      .result-content ul,
+      .result-content ol {
+        margin: 12px 0 12px 30px;
+      }
+
+      .result-content li {
+        margin-bottom: 6px;
+        line-height: 1.6;
+      }
+
+      /* COMPACT Identity Table */
+      .result-content .identity-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+        border: 1px solid #9ca3af;
+        font-size: 11pt;
+      }
+
+      .result-content .identity-table td {
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        vertical-align: top;
+      }
+
+      .result-content .identity-table tr:nth-child(odd) {
+        background-color: #f9fafb;
+      }
+
+      .result-content .identity-table td:first-child {
+        width: 160px;
+        font-weight: bold;
+        background-color: #e5e7eb;
+        color: #1f2937;
+      }
+
+      .result-content .identity-table td:nth-child(2) {
+        width: 15px;
+        text-align: center;
+        background-color: #e5e7eb;
+      }
+
+      /* COMPACT & PROPORTIONAL Assessment Table */
+      .result-content table:not(.identity-table) {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+        border: 1px solid #6b7280;
+        font-size: 10pt;
+      }
+
+      .result-content table:not(.identity-table) th {
+        background: linear-gradient(135deg, #b8860b, #8b6508);
+        color: #ffffff;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px 8px;
+        border: 1px solid #4b5563;
+        font-size: 10pt;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .result-content table:not(.identity-table) td {
+        border: 1px solid #9ca3af;
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+        line-height: 1.4;
+      }
+
+      .result-content table:not(.identity-table) tr:nth-child(even) {
+        background-color: #f8fafc;
+      }
+
+      .result-content table:not(.identity-table) tr:nth-child(odd) {
+        background-color: #ffffff;
+      }
+
+      .result-content table:not(.identity-table) tr:hover {
+        background-color: #e0e7ff;
+      }
+
+      .result-content table:not(.identity-table) td:first-child {
+        font-weight: 600;
+        background-color: #f1f5f9;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        padding: 30px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .footer span {
+        font-weight: 700;
+      }
+
+      .footer .dev {
+        color: var(--primary-light);
+      }
+
+      .footer .ai {
+        color: var(--secondary-light);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px 15px;
+        }
+
+        .form-card {
+          padding: 25px 20px;
+        }
+
+        .progress-container {
+          padding: 20px 15px;
+        }
+
+        .step-label {
+          font-size: 0.7rem;
+          max-width: 70px;
+        }
+
+        .step-circle {
+          width: 40px;
+          height: 40px;
+          font-size: 0.95rem;
+        }
+
+        .progress-steps::before {
+          left: 30px;
+          right: 30px;
+        }
+
+        .progress-line {
+          left: 30px;
+        }
+
+        .nav-buttons {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .review-item {
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .review-label {
+          width: 100%;
+        }
+
+        .result-content {
+          padding: 30px 20px;
+        }
+
+        .loading-container {
+          padding: 20px;
+        }
+
+        .progress-percentage {
+          font-size: 2rem;
+        }
+
+        .result-actions {
+          flex-direction: column;
+        }
+
+        .result-actions .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Animated Background -->
+    <div class="bg-animation">
+      <div class="floating-orb orb-1"></div>
+      <div class="floating-orb orb-2"></div>
+      <div class="floating-orb orb-3"></div>
+    </div>
+
+    <!-- ENHANCED Loading Overlay with Progress -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-container">
+        <div class="loading-icon">🤖</div>
+        <div class="loading-title">Generating Modul Ajar</div>
+        <div class="loading-subtitle">Powered by Deepseek AI</div>
+
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+        </div>
+
+        <div class="progress-percentage" id="progressPercentage">0%</div>
+        <div class="progress-status" id="progressStatus">Memulai proses...</div>
+
+        <div class="loading-tips">
+          <p>💡 <strong>Tips:</strong> Modul ajar yang dihasilkan sudah terintegrasi dengan pendekatan Deep Learning (Mindful, Meaningful, Joyful)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <div class="logo-icon">🎓</div>
+          <span class="logo-text">Pembuatan Modul Ajar Otomatis</span>
+        </div>
+        <p>Platform Rancang Instan Modul Ajar - Kurikulum Merdeka</p>
+      </header>
+
+      <!-- Progress Bar -->
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-steps">
+          <div class="progress-line" id="progressLine" style="width: 0px"></div>
+
+          <div class="step-item active" data-step="1" onclick="goToStep(1)">
+            <div class="step-circle">
+              <span class="step-number">1</span>
+            </div>
+            <span class="step-label">Identitas Modul</span>
+          </div>
+
+          <div class="step-item" data-step="2" onclick="goToStep(2)">
+            <div class="step-circle">
+              <span class="step-number">2</span>
+            </div>
+            <span class="step-label">Detail Pembelajaran</span>
+          </div>
+
+          <div class="step-item" data-step="3" onclick="goToStep(3)">
+            <div class="step-circle">
+              <span class="step-number">3</span>
+            </div>
+            <span class="step-label">Asesmen</span>
+          </div>
+
+          <div class="step-item" data-step="4" onclick="goToStep(4)">
+            <div class="step-circle">
+              <span class="step-number">4</span>
+            </div>
+            <span class="step-label">Review &amp; Generate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <div class="form-card" id="formCard">
+        <form id="modulForm">
+          <!-- Step 1: Identitas Modul -->
+          <div class="step-content active" data-step="1">
+            <div class="step-header">
+              <h2><span class="header-icon">📋</span><span class="header-text">Identitas Modul</span></h2>
+              <p>Lengkapi informasi dasar modul ajar Anda</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label><span class="icon">👤</span> Penyusun</label>
+                <input type="text" id="penyusun" placeholder="Nama lengkap penyusun" />
+              </div>
+
+              <div class="form-group">
+                <label><span class="icon">🏫</span> Instansi</label>
+                <input type="text" id="instansi" placeholder="Nama sekolah/instansi" />
+              </div>
+
+              <div class="form-group">
+                <label><span class="icon">📅</span> Tahun Penyusunan</label>
+                <select id="tahunPenyusunan">
+                  <option value="">Pilih Tahun</option>
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026">2026</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label><span class="icon">🎓</span> Jenjang Sekolah</label>
+                <select id="jenjangSekolah">
+                  <option value="">Pilih Jenjang</option>
+                  <option value="SD">SD</option>
+                  <option value="SMP">SMP</option>
+                  <option value="SMA">SMA</option>
+                  <option value="SMK">SMK</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label><span class="icon">📚</span> Mata Pelajaran</label>
+                <select id="mataPelajaran">
+                  <option value="">Pilih Mata Pelajaran</option>
+                  <option value="Infomatika">Informatika</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label><span class="icon">📊</span> Fase/Kelas</label>
+                <select id="faseKelas">
+                  <option value="">Pilih Fase/Kelas</option>
+                  <option value="Fase A (Kelas 1-2)">Fase A (Kelas 1-2)</option>
+                  <option value="Fase B (Kelas 3-4)">Fase B (Kelas 3-4)</option>
+                  <option value="Fase C (Kelas 5-6)">Fase C (Kelas 5-6)</option>
+                  <option value="Fase D (Kelas 7-9)">Fase D (Kelas 7-9)</option>
+                  <option value="Fase E (Kelas 10)">Fase E (Kelas 10)</option>
+                  <option value="Fase F (Kelas 11-12)">Fase F (Kelas 11-12)</option>
+                </select>
+              </div>
+
+
+              <div class="form-group">
+                <label><span class="icon">💡</span> Topik Pembelajaran</label>
+                <input type="text" id="topikPembelajaran" placeholder="Contoh: Sistem Persamaan Linear" />
+              </div>
+
+              <div class="form-group">
+                <label><span class="icon">⏰</span> Alokasi Waktu</label>
+                <input type="text" id="alokasiWaktu" placeholder="Contoh: 24 JP" />
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <div></div>
+              <button type="button" class="btn btn-primary" onclick="nextStep()">Lanjutkan <span>→</span></button>
+            </div>
+          </div>
+
+          <!-- Step 2: Detail Pembelajaran -->
+          <div class="step-content" data-step="2">
+            <div class="step-header">
+              <h2><span class="header-icon">🎯</span><span class="header-text">Detail Pembelajaran</span></h2>
+              <p>Tentukan profil, model, dan strategi pembelajaran</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label><span class="icon">🌟</span> Delapan Dimensi Profil Lulusan</label>
+                <select id="profilLulusan">
+                  <option value="">Pilih Dimensi (klik untuk menambah)</option>
+                  <option value="Keimanan dan Ketakwaan terhadap Tuhan Yang Maha Esa">🙏 Keimanan dan Ketakwaan terhadap Tuhan YME</option>
+                  <option value="Kewargaan">🌍 Kewargaan</option>
+                  <option value="Penalaran Kritis">🧠 Penalaran Kritis</option>
+                  <option value="Kreativitas">🎨 Kreativitas</option>
+                  <option value="Kemandirian">💪 Kemandirian</option>
+                  <option value="Kolaborasi">🤝 Kolaborasi</option>
+                  <option value="Kesehatan">❤️ Kesehatan</option>
+                  <option value="Komunikasi">🗣️ Komunikasi</option>
+                </select>
+                <div class="selected-items-container" id="selectedDimensionsContainer">
+                  <span class="empty-selection">Belum ada dimensi yang dipilih</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label><span class="icon">🎯</span> Model Pembelajaran</label>
+                <select id="modelPembelajaran">
+                  <option value="">Pilih Model</option>
+                  <optgroup label="📝 Problem Based Learning (PBL)">
+                    <option value="Problem Based Learning - Model De Grave">📝 PBL - Model De Grave</option>
+                    <option value="Problem Based Learning - Model Maastricht">📝 PBL - Model Maastricht (Seven Jump)</option>
+                    <option value="Problem Based Learning - Problem Posing">📝 PBL - Problem Posing</option>
+                  </optgroup>
+                  <optgroup label="🏗️ Project Based Learning (PjBL)">
+                    <option value="Project Based Learning - Structured PjBL">🏗️ PjBL - Structured</option>
+                    <option value="Project Based Learning - Challenge Based Learning">🏗️ PjBL - Challenge Based</option>
+                    <option value="Project Based Learning - Place Based Education">🏗️ PjBL - Place Based</option>
+                  </optgroup>
+                  <optgroup label="🔍 Discovery Learning">
+                    <option value="Discovery Learning - Pure Discovery">🔍 Discovery - Pure Discovery</option>
+                    <option value="Discovery Learning - Guided Discovery">🔍 Discovery - Guided Discovery</option>
+                    <option value="Discovery Learning - Simulations &amp; Microworlds">🔍 Discovery - Simulations &amp; Microworlds</option>
+                  </optgroup>
+                  <optgroup label="❓ Inquiry Learning">
+                    <option value="Inquiry Learning - Confirmation Inquiry">❓ Inquiry - Confirmation (Level 1)</option>
+                    <option value="Inquiry Learning - Structured Inquiry">❓ Inquiry - Structured (Level 2)</option>
+                    <option value="Inquiry Learning - Guided Inquiry">❓ Inquiry - Guided (Level 3)</option>
+                    <option value="Inquiry Learning - Open Inquiry">❓ Inquiry - Open (Level 4)</option>
+                  </optgroup>
+                  <optgroup label="🔄 Flipped Classroom">
+                    <option value="Flipped Classroom - Standard">🔄 Flipped - Standard</option>
+                    <option value="Flipped Classroom - Debate Oriented">🔄 Flipped - Debate Oriented</option>
+                    <option value="Flipped Classroom - Mastery">🔄 Flipped - Mastery</option>
+                    <option value="Flipped Classroom - Group Based">🔄 Flipped - Group Based</option>
+                  </optgroup>
+                  <optgroup label="👥 Cooperative Learning">
+                    <option value="Cooperative Learning - STAD">👥 Cooperative - STAD</option>
+                    <option value="Cooperative Learning - Jigsaw">👥 Cooperative - Jigsaw</option>
+                    <option value="Cooperative Learning - Group Investigation">👥 Cooperative - Group Investigation</option>
+                    <option value="Cooperative Learning - TGT">👥 Cooperative - TGT</option>
+                    <option value="Cooperative Learning - Think Pair Share">👥 Cooperative - Think-Pair-Share</option>
+                  </optgroup>
+                  <optgroup label="📋 Lainnya">
+                    <option value="Direct Instruction">📋 Direct Instruction</option>
+                    <option value="Contextual Teaching Learning">📋 Contextual Teaching Learning</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label><span class="icon">⚡</span> Strategi Pembelajaran</label>
+                <select id="strategiPembelajaran">
+                  <option value="">Pilih Strategi</option>
+                  <option value="Ceramah Interaktif">🎤 Ceramah Interaktif</option>
+                  <option value="Diskusi Kelompok">💬 Diskusi Kelompok</option>
+                  <option value="Eksperimen">🧪 Eksperimen</option>
+                  <option value="Observasi">👁️ Observasi</option>
+                  <option value="Presentasi">📊 Presentasi</option>
+                  <option value="Role Playing">🎭 Role Playing</option>
+                  <option value="Think Pair Share">🤔 Think Pair Share</option>
+                  <option value="Jigsaw">🧩 Jigsaw</option>
+                  <option value="Numbered Heads Together">🔢 Numbered Heads Together</option>
+                  <option value="Gallery Walk">🚶 Gallery Walk</option>
+                  <option value="Brainstorming">💭 Brainstorming</option>
+                  <option value="Demonstrasi">👨&zwj;🏫 Demonstrasi</option>
+                  <option value="Simulasi">🎮 Simulasi</option>
+                  <option value="Studi Kasus">📋 Studi Kasus</option>
+                  <option value="Mind Mapping">🗺️ Mind Mapping</option>
+                </select>
+              </div>
+
+              <div class="form-group full-width">
+                <label><span class="icon">🎯</span> Capaian Pembelajaran</label>
+                <textarea id="tujuanPembelajaran" rows="4" placeholder="Masukkan capaian pembelajaran yang spesifik, terukur, dan dapat dicapai. Biarkan kosong jika ingin AI yang menyusun otomatis..."></textarea>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <button type="button" class="btn btn-secondary" onclick="prevStep()"><span>←</span> Kembali</button>
+              <button type="button" class="btn btn-primary" onclick="nextStep()">Lanjutkan <span>→</span></button>
+            </div>
+          </div>
+
+          <!-- Step 3: Asesmen -->
+          <div class="step-content" data-step="3">
+            <div class="step-header">
+              <h2><span class="header-icon">📊</span><span class="header-text">Asesmen &amp; Tambahan</span></h2>
+              <p>Pilih jenis asesmen dan opsi tambahan</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label><span class="icon">📋</span> Jenis Asesmen</label>
+                <select id="jenisAsesmen">
+                  <option value="">Pilih Jenis Asesmen</option>
+                  <option value="Asesmen Formatif dan Sumatif">📝 Asesmen Formatif dan Sumatif</option>
+                  <option value="Asesmen Autentik">✅ Asesmen Autentik</option>
+                  <option value="Asesmen Portofolio">📁 Asesmen Portofolio</option>
+                  <option value="Asesmen Kinerja">⚡ Asesmen Kinerja</option>
+                  <option value="Asesmen Proyek">🏗️ Asesmen Proyek</option>
+                  <option value="Asesmen Tertulis">📄 Asesmen Tertulis</option>
+                  <option value="Asesmen Lisan">🎤 Asesmen Lisan</option>
+                  <option value="Asesmen Praktik">🔧 Asesmen Praktik</option>
+                  <option value="Peer Assessment">👥 Peer Assessment</option>
+                  <option value="Self Assessment">🪞 Self Assessment</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label><span class="icon">📊</span> Bentuk Instrumen Asesmen</label>
+                <select id="bentukAsesmen">
+                  <option value="">Pilih Bentuk Instrumen</option>
+                  <option value="Rubrik Penilaian">📋 Rubrik Penilaian</option>
+                  <option value="Checklist">☑️ Checklist</option>
+                  <option value="Rating Scale">⭐ Rating Scale</option>
+                  <option value="Anecdotal Record">📝 Anecdotal Record</option>
+                  <option value="Soal Pilihan Ganda">🔘 Soal Pilihan Ganda</option>
+                  <option value="Soal Uraian">📄 Soal Uraian</option>
+                  <option value="Lembar Observasi">👁️ Lembar Observasi</option>
+                  <option value="Jurnal Refleksi">📓 Jurnal Refleksi</option>
+                </select>
+              </div>
+
+              <div class="form-group full-width">
+                <label><span class="icon">💬</span> Konteks Tambahan (Opsional)</label>
+                <textarea id="contextTambahan" rows="3" placeholder="Tambahkan informasi khusus tentang pembelajaran ini, misalnya karakteristik siswa, kondisi sekolah, atau kebutuhan khusus..."></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label class="checkbox-wrapper">
+                  <input type="checkbox" id="aiIntegrationActivity" />
+                  <div class="checkbox-content">
+                    <h4>🤖 AI Integration Activity</h4>
+                    <p>Centang untuk menambahkan aktivitas pembelajaran yang melibatkan penggunaan aplikasi AI seperti ChatGPT, Gemini, atau tools AI lainnya dalam proses pembelajaran</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="nav-buttons">
+              <button type="button" class="btn btn-secondary" onclick="prevStep()"><span>←</span> Kembali</button>
+              <button type="button" class="btn btn-primary" onclick="nextStep()">Lanjutkan <span>→</span></button>
+            </div>
+          </div>
+
+          <!-- Step 4: Review & Generate -->
+          <div class="step-content" data-step="4">
+            <div class="step-header">
+              <h2><span class="header-icon">✅</span><span class="header-text">Review &amp; Generate</span></h2>
+              <p>Periksa kembali data sebelum generate modul ajar</p>
+            </div>
+
+            <div class="review-grid" id="reviewContent">
+              <!-- Will be populated by JavaScript -->
+            </div>
+
+            <div class="nav-buttons">
+              <button type="button" class="btn btn-secondary" onclick="prevStep()"><span>←</span> Kembali</button>
+              <button type="submit" class="btn btn-generate">🚀 Generate Modul Ajar</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Result Section -->
+      <div class="result-section" id="resultSection">
+        <div class="result-actions">
+          <button class="btn btn-export" onclick="exportToPDF()">📄 Download PDF</button>
+          <button class="btn btn-export" onclick="exportToDoc()">📝 Download DOC</button>
+          <button class="btn btn-regenerate" onclick="regenerateModul()">🔄 Regenerate</button>
+          <button class="btn btn-new" onclick="generateNew()">✨ Buat Modul Baru</button>
+        </div>
+        <div class="form-card">
+          <div id="resultContent" class="result-content"></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>Developed by <span class="dev">Ariq Mudrik</span> • Powered by <span class="ai">DeepSeek AI</span></p>
+      </footer>
+    </div>
+
+    <script>
+      // =====================================================
+      // STATE MANAGEMENT
+      // =====================================================
+      let currentStep = 1;
+      const totalSteps = 4;
+      let selectedDimensions = [];
+      let generatedContent = "";
+      let lastFormData = null;
+
+      // API Configuration
+      const OPENAI_API_KEY = "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";
+      const OPENAI_API_ENDPOINT = "https://api.openai.com/v1/chat/completions";
+      const OPENAI_MODEL = "gpt-4.1";
+
+      // Progress tracking
+      let progressInterval = null;
+
+      // =====================================================
+      // INITIALIZATION
+      // =====================================================
+      document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("tahunPenyusunan").value = new Date().getFullYear().toString();
+        initDimensionSelect();
+        updateProgressBar();
+      });
+
+      // =====================================================
+      // PROGRESS ANIMATION
+      // =====================================================
+      const progressStages = [
+        { percent: 5, status: "Memulai proses..." },
+        { percent: 10, status: "Menghubungkan ke AI..." },
+        { percent: 15, status: "Mengirim data pembelajaran..." },
+        { percent: 25, status: "AI sedang menganalisis konteks..." },
+        { percent: 35, status: "Menyusun struktur modul..." },
+        { percent: 45, status: "Mengintegrasikan Deep Learning..." },
+        { percent: 55, status: "Membuat kegiatan pembelajaran detail..." },
+        { percent: 65, status: "Menyusun langkah-langkah aktivitas..." },
+        { percent: 72, status: "Membuat instrumen asesmen..." },
+        { percent: 80, status: "Membuat lampiran dan rubrik..." },
+        { percent: 88, status: "Finalisasi modul ajar..." },
+        { percent: 94, status: "Memvalidasi output..." },
+        { percent: 97, status: "Hampir selesai..." },
+      ];
+
+      function updateProgress(percent, status) {
+        document.getElementById("progressBarFill").style.width = percent + "%";
+        document.getElementById("progressPercentage").textContent = percent + "%";
+        document.getElementById("progressStatus").textContent = status;
+      }
+
+      function startProgressAnimation() {
+        let currentStage = 0;
+        updateProgress(0, "Memulai proses...");
+
+        progressInterval = setInterval(() => {
+          if (currentStage < progressStages.length) {
+            const stage = progressStages[currentStage];
+            updateProgress(stage.percent, stage.status);
+            currentStage++;
+          }
+        }, 2000);
+      }
+
+      function stopProgressAnimation() {
+        if (progressInterval) {
+          clearInterval(progressInterval);
+          progressInterval = null;
+        }
+        updateProgress(100, "Selesai! ✓");
+      }
+
+      function resetProgress() {
+        updateProgress(0, "Memulai proses...");
+      }
+
+      // =====================================================
+      // MULTI-SELECT FUNCTIONALITY
+      // =====================================================
+      function initDimensionSelect() {
+        const select = document.getElementById("profilLulusan");
+
+        select.addEventListener("change", function () {
+          const value = this.value;
+          const text = this.options[this.selectedIndex].text;
+
+          if (value && !selectedDimensions.some((d) => d.value === value)) {
+            selectedDimensions.push({ value, text });
+            updateDimensionsDisplay();
+          }
+
+          this.selectedIndex = 0;
+        });
+      }
+
+      function updateDimensionsDisplay() {
+        const container = document.getElementById("selectedDimensionsContainer");
+
+        if (selectedDimensions.length === 0) {
+          container.innerHTML = '<span class="empty-selection">Belum ada dimensi yang dipilih</span>';
+        } else {
+          container.innerHTML = selectedDimensions
+            .map(
+              (dim, index) => `
+                    <span class="selected-item-tag">
+                        ${dim.text}
+                        <span class="remove-tag" onclick="removeDimension(${index})">×</span>
+                    </span>
+                `,
+            )
+            .join("");
+        }
+      }
+
+      function removeDimension(index) {
+        selectedDimensions.splice(index, 1);
+        updateDimensionsDisplay();
+      }
+
+      // =====================================================
+      // STEP NAVIGATION
+      // =====================================================
+      function goToStep(step) {
+        if (step > currentStep) return;
+        currentStep = step;
+        updateStepDisplay();
+        updateProgressBar();
+      }
+
+      function nextStep() {
+        if (currentStep < totalSteps) {
+          currentStep++;
+          updateStepDisplay();
+          updateProgressBar();
+
+          if (currentStep === totalSteps) {
+            generateReviewContent();
+          }
+        }
+      }
+
+      function prevStep() {
+        if (currentStep > 1) {
+          currentStep--;
+          updateStepDisplay();
+          updateProgressBar();
+        }
+      }
+
+      function updateStepDisplay() {
+        document.querySelectorAll(".step-content").forEach((content) => {
+          content.classList.remove("active");
+        });
+
+        document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.add("active");
+
+        document.querySelectorAll(".step-item").forEach((item) => {
+          const itemStep = parseInt(item.dataset.step);
+          item.classList.remove("active", "completed");
+
+          if (itemStep === currentStep) {
+            item.classList.add("active");
+          } else if (itemStep < currentStep) {
+            item.classList.add("completed");
+          }
+        });
+
+        document.getElementById("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function updateProgressBar() {
+        const progressLine = document.getElementById("progressLine");
+        const percentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        const maxWidth = document.querySelector(".progress-steps").offsetWidth - 80;
+        progressLine.style.width = `${(percentage / 100) * maxWidth}px`;
+      }
+
+      // =====================================================
+      // REVIEW CONTENT GENERATION
+      // =====================================================
+      function generateReviewContent() {
+        const reviewContainer = document.getElementById("reviewContent");
+        const formData = getFormData();
+
+        reviewContainer.innerHTML = `
+                <div class="review-section">
+                    <h3>📋 Identitas Modul</h3>
+                    <div class="review-item">
+                        <span class="review-label">Penyusun</span>
+                        <span class="review-value ${!formData.penyusun ? "empty" : ""}">${formData.penyusun || "Belum diisi"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Instansi</span>
+                        <span class="review-value ${!formData.instansi ? "empty" : ""}">${formData.instansi || "Belum diisi"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Tahun Penyusunan</span>
+                        <span class="review-value ${!formData.tahunPenyusunan ? "empty" : ""}">${formData.tahunPenyusunan || "Belum dipilih"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Jenjang Sekolah</span>
+                        <span class="review-value ${!formData.jenjangSekolah ? "empty" : ""}">${formData.jenjangSekolah || "Belum dipilih"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Mata Pelajaran</span>
+                        <span class="review-value ${!formData.mataPelajaran ? "empty" : ""}">${formData.mataPelajaran || "Belum dipilih"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Fase/Kelas</span>
+                        <span class="review-value ${!formData.faseKelas ? "empty" : ""}">${formData.faseKelas || "Belum dipilih"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Topik Pembelajaran</span>
+                        <span class="review-value ${!formData.topikPembelajaran ? "empty" : ""}">${formData.topikPembelajaran || "Belum diisi"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Alokasi Waktu</span>
+                        <span class="review-value ${!formData.alokasiWaktu ? "empty" : ""}">${formData.alokasiWaktu || "Belum diisi"}</span>
+                    </div>
+                </div>
+                
+                <div class="review-section">
+                    <h3>🎯 Detail Pembelajaran</h3>
+                    <div class="review-item">
+                        <span class="review-label">Profil Lulusan</span>
+                        <span class="review-value ${formData.profilLulusan.length === 0 ? "empty" : ""}">${formData.profilLulusan.length > 0 ? formData.profilLulusan.join(", ") : "Belum dipilih"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Model Pembelajaran</span>
+                        <span class="review-value ${!formData.modelPembelajaran ? "empty" : ""}">${formData.modelPembelajaran || "Belum dipilih"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Strategi Pembelajaran</span>
+                        <span class="review-value ${!formData.strategiPembelajaran ? "empty" : ""}">${formData.strategiPembelajaran || "Belum dipilih"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Capaian Pembelajaran</span>
+                        <span class="review-value ${!formData.tujuanPembelajaran ? "empty" : ""}">${formData.tujuanPembelajaran || "Akan di-generate oleh AI"}</span>
+                    </div>
+                </div>
+                
+                <div class="review-section">
+                    <h3>📊 Asesmen</h3>
+                    <div class="review-item">
+                        <span class="review-label">Jenis Asesmen</span>
+                        <span class="review-value ${!formData.jenisAsesmen ? "empty" : ""}">${formData.jenisAsesmen || "Belum dipilih"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Bentuk Instrumen</span>
+                        <span class="review-value ${!formData.bentukAsesmen ? "empty" : ""}">${formData.bentukAsesmen || "Belum dipilih"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Konteks Tambahan</span>
+                        <span class="review-value ${!formData.contextTambahan ? "empty" : ""}">${formData.contextTambahan || "Tidak ada"}</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">AI Integration</span>
+                        <span class="review-value">${formData.aiIntegrationActivity ? "✅ Aktif" : "❌ Tidak aktif"}</span>
+                    </div>
+                </div>
+            `;
+      }
+
+      // =====================================================
+      // FORM DATA COLLECTION
+      // =====================================================
+      function getFormData() {
+        return {
+          penyusun: document.getElementById("penyusun").value,
+          instansi: document.getElementById("instansi").value,
+          tahunPenyusunan: document.getElementById("tahunPenyusunan").value,
+          jenjangSekolah: document.getElementById("jenjangSekolah").value,
+          mataPelajaran: document.getElementById("mataPelajaran").value,
+          faseKelas: document.getElementById("faseKelas").value,
+          topikPembelajaran: document.getElementById("topikPembelajaran").value,
+          alokasiWaktu: document.getElementById("alokasiWaktu").value,
+          profilLulusan: selectedDimensions.map((d) => d.value),
+          modelPembelajaran: document.getElementById("modelPembelajaran").value,
+          strategiPembelajaran: document.getElementById("strategiPembelajaran").value,
+          tujuanPembelajaran: document.getElementById("tujuanPembelajaran").value,
+          jenisAsesmen: document.getElementById("jenisAsesmen").value,
+          bentukAsesmen: document.getElementById("bentukAsesmen").value,
+          contextTambahan: document.getElementById("contextTambahan").value,
+          aiIntegrationActivity: document.getElementById("aiIntegrationActivity").checked,
+        };
+      }
+
+      // =====================================================
+      // FORM SUBMISSION & AI GENERATION
+      // =====================================================
+      document.getElementById("modulForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        await runGeneration();
+      });
+
+      // REGENERATE FUNCTION - Generate ulang dengan data yang sama
+      async function regenerateModul() {
+        if (!lastFormData) {
+          alert("Tidak ada data sebelumnya. Silakan generate modul terlebih dahulu.");
+          return;
+        }
+
+        document.getElementById("resultSection").classList.remove("active");
+        document.getElementById("loadingOverlay").classList.add("active");
+        resetProgress();
+        startProgressAnimation();
+
+        try {
+          const content = await generateModulAjar(lastFormData);
+          stopProgressAnimation();
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          displayResult(content);
+          generatedContent = content;
+        } catch (error) {
+          console.error("Error:", error);
+          stopProgressAnimation();
+          alert("Terjadi kesalahan. Silakan coba lagi.");
+        } finally {
+          document.getElementById("loadingOverlay").classList.remove("active");
+        }
+      }
+
+      async function runGeneration() {
+        document.getElementById("loadingOverlay").classList.add("active");
+        document.getElementById("resultSection").classList.remove("active");
+        resetProgress();
+        startProgressAnimation();
+
+        const formData = getFormData();
+        lastFormData = formData; // Save for regenerate
+
+        try {
+          const content = await generateModulAjar(formData);
+          stopProgressAnimation();
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          displayResult(content);
+          generatedContent = content;
+        } catch (error) {
+          console.error("Error:", error);
+          stopProgressAnimation();
+
+          let errorMessage = "Terjadi kesalahan saat menggenerate modul ajar.";
+          if (error.message.includes("API Error")) {
+            errorMessage = `Error API: ${error.message}`;
+          } else if (error.message.includes("network") || error.message.includes("fetch")) {
+            errorMessage = "Masalah koneksi internet. Silakan periksa koneksi Anda dan coba lagi.";
+          }
+
+          alert(errorMessage);
+        } finally {
+          document.getElementById("loadingOverlay").classList.remove("active");
+        }
+      }
+
+      // =====================================================
+      // AI MODULE GENERATION - 10000 TOKENS, DETAILED ACTIVITIES
+      // =====================================================
+      async function generateModulAjar(data) {
+        const parseAlokasiWaktu = (alokasiWaktu) => {
+          const regex = /(\d+)\s*x\s*(\d+)/i;
+          const match = alokasiWaktu.match(regex);
+          if (match) {
+            const pertemuan = parseInt(match[1]);
+            const menitPerPertemuan = parseInt(match[2]);
+            return {
+              pertemuan: pertemuan,
+              menitPerPertemuan: menitPerPertemuan,
+              totalMenit: pertemuan * menitPerPertemuan,
+              pendahuluan: Math.round(menitPerPertemuan * 0.15),
+              inti: Math.round(menitPerPertemuan * 0.7),
+              penutup: Math.round(menitPerPertemuan * 0.15),
+            };
+          }
+          return { pertemuan: 1, menitPerPertemuan: 60, totalMenit: 60, pendahuluan: 10, inti: 40, penutup: 10 };
+        };
+
+        const waktuDetail = parseAlokasiWaktu(data.alokasiWaktu);
+
+        const prompt = `Buatkan Modul Ajar Kurikulum Merdeka yang LENGKAP, DETAIL, dan KOMPREHENSIF dengan format HTML. WAJIB mengintegrasikan prinsip DEEP LEARNING (Mindful, Meaningful, Joyful).
+
+DATA PEMBELAJARAN:
+- Penyusun: ${data.penyusun || "Guru"}
+- Instansi: ${data.instansi || "Sekolah"}
+- Tahun: ${data.tahunPenyusunan || "2025"}
+- Jenjang: ${data.jenjangSekolah || "SMP"}
+- Mapel: ${data.mataPelajaran || "IPA"}
+- Fase/Kelas: ${data.faseKelas || "Fase D"}
+- BAB: ${data.bab || "BAB 1"}
+- Topik: ${data.topikPembelajaran || "Pembelajaran"}
+- Alokasi: ${data.alokasiWaktu || "2 x 40 menit"}
+- Waktu: Pendahuluan ${waktuDetail.pendahuluan} menit, Inti ${waktuDetail.inti} menit, Penutup ${waktuDetail.penutup} menit
+- Profil Lulusan: ${data.profilLulusan.length > 0 ? data.profilLulusan.join(", ") : "Penalaran Kritis, Kreativitas"}
+- Model: ${data.modelPembelajaran || "Discovery Learning"}
+- Strategi: ${data.strategiPembelajaran || "Diskusi Kelompok"}
+- Capaian: ${data.tujuanPembelajaran || "Generate capaian pembelajaran komprehensif"}
+- Asesmen: ${data.jenisAsesmen || "Formatif dan Sumatif"}
+- Instrumen: ${data.bentukAsesmen || "Rubrik Penilaian"}
+${data.contextTambahan ? "- Konteks: " + data.contextTambahan : ""}
+${data.aiIntegrationActivity ? "- AI Integration: WAJIB sertakan aktivitas menggunakan AI tools (ChatGPT, Gemini, dll)" : ""}
+
+INSTRUKSI PENTING:
+1. SEMUA tabel HARUS menggunakan format yang benar dengan <table>, <tr>, <th>, <td>
+2. KEGIATAN PEMBELAJARAN harus SANGAT DETAIL dengan langkah-langkah spesifik
+3. Setiap fase kegiatan inti harus mencakup: waktu, aktivitas guru, aktivitas siswa, dan integrasi Deep Learning
+4. JANGAN gunakan placeholder atau teks dalam kurung siku
+5. Semua konten harus substantif dan actionable
+
+FORMAT HTML WAJIB:
+
+<h1>MODUL AJAR KURIKULUM MERDEKA</h1>
+<h1>${(data.mataPelajaran || "MATA PELAJARAN").toUpperCase()} - ${data.topikPembelajaran || "TOPIK"}</h1>
+
+<h2>INFORMASI UMUM</h2>
+
+<h3>A. IDENTITAS MODUL</h3>
+<table class="identity-table">
+<tr><td>Penyusun</td><td>:</td><td>${data.penyusun || "Guru"}</td></tr>
+<tr><td>Instansi</td><td>:</td><td>${data.instansi || "Sekolah"}</td></tr>
+<tr><td>Tahun Penyusunan</td><td>:</td><td>${data.tahunPenyusunan || "2025"}</td></tr>
+<tr><td>Jenjang Sekolah</td><td>:</td><td>${data.jenjangSekolah || "SMP"}</td></tr>
+<tr><td>Mata Pelajaran</td><td>:</td><td>${data.mataPelajaran || "IPA"}</td></tr>
+<tr><td>Fase/Kelas</td><td>:</td><td>${data.faseKelas || "Fase D"}</td></tr>
+<tr><td>BAB</td><td>:</td><td>${data.bab || "BAB 1"}</td></tr>
+<tr><td>Topik</td><td>:</td><td>${data.topikPembelajaran || "Pembelajaran"}</td></tr>
+<tr><td>Alokasi Waktu</td><td>:</td><td>${data.alokasiWaktu || "2 x 40 menit"}</td></tr>
+<tr><td>Pendekatan</td><td>:</td><td>Deep Learning (Mindful, Meaningful, Joyful)</td></tr>
+</table>
+
+<h3>B. PENDEKATAN DEEP LEARNING</h3>
+<table>
+<tr><th>Aspek</th><th>Deskripsi Implementasi</th></tr>
+<tr><td><strong>🧘 MINDFUL</strong></td><td>[Jelaskan aktivitas refleksi, kesadaran diri, goal setting yang spesifik untuk topik ini]</td></tr>
+<tr><td><strong>💡 MEANINGFUL</strong></td><td>[Jelaskan koneksi dengan kehidupan nyata, aplikasi praktis, relevansi dengan isu terkini]</td></tr>
+<tr><td><strong>🎉 JOYFUL</strong></td><td>[Jelaskan aktivitas menyenangkan: games, tantangan, kolaborasi, kreativitas]</td></tr>
+</table>
+
+<h3>C. KOMPETENSI AWAL</h3>
+[Buat 4 poin kompetensi prasyarat yang spesifik]
+
+<h3>D. PROFIL LULUSAN YANG DIKEMBANGKAN</h3>
+[Jelaskan bagaimana dimensi ${data.profilLulusan.length > 0 ? data.profilLulusan.join(", ") : "yang dipilih"} dikembangkan]
+
+<h3>E. SARANA DAN PRASARANA</h3>
+[Buat daftar media, alat/bahan (utamakan low-cost), dan sumber belajar]
+
+<h3>F. TARGET PESERTA DIDIK</h3>
+[Deskripsi karakteristik peserta didik]
+
+<h3>G. MODEL DAN STRATEGI PEMBELAJARAN</h3>
+<table>
+<tr><th>Komponen</th><th>Deskripsi</th></tr>
+<tr><td>Model</td><td><strong>${data.modelPembelajaran || "Discovery Learning"}</strong> - [penjelasan implementasi]</td></tr>
+<tr><td>Strategi</td><td><strong>${data.strategiPembelajaran || "Diskusi Kelompok"}</strong> - [penjelasan implementasi]</td></tr>
+</table>
+
+<h2>KOMPONEN INTI</h2>
+
+<h3>A. CAPAIAN PEMBELAJARAN</h3>
+[Generate capaian pembelajaran komprehensif dengan indikator pencapaian]
+
+<h3>B. KEGIATAN PEMBELAJARAN</h3>
+
+<h4>KEGIATAN PENDAHULUAN (${waktuDetail.pendahuluan} menit)</h4>
+<table>
+<tr><th>Waktu</th><th>Aktivitas</th><th>Deskripsi Detail</th><th>Deep Learning</th></tr>
+<tr><td>2'</td><td>Pembukaan</td><td>Guru memberi salam dan menyapa peserta didik dengan hangat. Salah satu siswa memimpin doa.</td><td>Mindful</td></tr>
+<tr><td>3'</td><td>Mindful Moment</td><td>[Aktivitas mindfulness spesifik: breathing, intention setting, atau refleksi]</td><td>🧘 Mindful</td></tr>
+<tr><td>3'</td><td>Apersepsi</td><td>[Pertanyaan pemantik yang mengaitkan dengan pengalaman nyata siswa]</td><td>💡 Meaningful</td></tr>
+<tr><td>2'</td><td>Ice Breaker</td><td>[Aktivitas energizer yang fun dan relevan dengan topik]</td><td>🎉 Joyful</td></tr>
+<tr><td>2'</td><td>Tujuan</td><td>Guru menyampaikan tujuan pembelajaran dengan cara yang engaging</td><td>Meaningful</td></tr>
+</table>
+
+<h4>KEGIATAN INTI (${waktuDetail.inti} menit)</h4>
+<p><strong>Model: ${data.modelPembelajaran || "Discovery Learning"}</strong></p>
+
+<table>
+<tr><th>Fase</th><th>Waktu</th><th>Aktivitas Guru</th><th>Aktivitas Siswa</th><th>Deep Learning</th></tr>
+<tr>
+<td><strong>Fase 1: Stimulasi</strong></td>
+<td>${Math.round(waktuDetail.inti * 0.15)}'</td>
+<td>[Aktivitas guru detail: menampilkan stimulus, memberikan pertanyaan pemandu, membangkitkan rasa ingin tahu]</td>
+<td>[Aktivitas siswa detail: mengamati, merespon, bertanya, mencatat]</td>
+<td>🧘 Refleksi awal<br>💡 Koneksi real-world<br>🎉 Aktivitas engaging</td>
+</tr>
+<tr>
+<td><strong>Fase 2: Identifikasi Masalah</strong></td>
+<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
+<td>[Aktivitas guru: membimbing siswa merumuskan masalah, memberikan scaffolding, monitoring]</td>
+<td>[Aktivitas siswa: berdiskusi, merumuskan pertanyaan, mengidentifikasi variabel]</td>
+<td>🧘 Self-monitoring<br>💡 Problem kontekstual<br>🎉 Kolaborasi aktif</td>
+</tr>
+<tr>
+<td><strong>Fase 3: Pengumpulan Data</strong></td>
+<td>${Math.round(waktuDetail.inti * 0.25)}'</td>
+<td>[Aktivitas guru: memfasilitasi eksplorasi, memberikan resources, membimbing hands-on activity]</td>
+<td>[Aktivitas siswa: melakukan eksperimen/observasi, mengumpulkan informasi, bekerja kolaboratif]</td>
+<td>🧘 Focus & concentration<br>💡 Investigasi autentik<br>🎉 Hands-on learning</td>
+</tr>
+<tr>
+<td><strong>Fase 4: Pengolahan Data</strong></td>
+<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
+<td>[Aktivitas guru: membimbing analisis, mengajukan pertanyaan klarifikasi, memberikan feedback]</td>
+<td>[Aktivitas siswa: menganalisis hasil, membuat kesimpulan, menyusun presentasi]</td>
+<td>🧘 Metacognitive check<br>💡 Critical thinking<br>🎉 Creative expression</td>
+</tr>
+<tr>
+<td><strong>Fase 5: Generalisasi</strong></td>
+<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
+<td>[Aktivitas guru: membantu generalisasi, menghubungkan dengan konteks lain, memberikan penguatan]</td>
+<td>[Aktivitas siswa: mempresentasikan, menanggapi, membuat generalisasi, aplikasi konsep]</td>
+<td>🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration</td>
+</tr>
+</table>
+
+${
+  data.aiIntegrationActivity
+    ? `
+<h4>🤖 INTEGRASI AI DALAM PEMBELAJARAN</h4>
+<table>
+<tr><th>Tahap</th><th>Tools AI</th><th>Aktivitas</th><th>Panduan Prompt</th></tr>
+<tr><td>Eksplorasi</td><td>ChatGPT/Gemini</td><td>Brainstorming ide dan konsep</td><td>"Bantu saya memahami [konsep] dengan analogi sederhana"</td></tr>
+<tr><td>Elaborasi</td><td>Perplexity AI</td><td>Research dan verifikasi</td><td>Siswa mencari sumber terpercaya</td></tr>
+<tr><td>Kreasi</td><td>Canva AI</td><td>Membuat infografis</td><td>Visualisasi hasil pembelajaran</td></tr>
+<tr><td>Refleksi</td><td>Claude AI</td><td>Self-assessment</td><td>"Berikan feedback untuk hasil kerja saya"</td></tr>
+</table>
+<p><strong>Etika AI:</strong> Verifikasi informasi, gunakan sebagai learning partner, berikan kredit yang tepat.</p>
+`
+    : ""
+}
+
+<h4>KEGIATAN PENUTUP (${waktuDetail.penutup} menit)</h4>
+<table>
+<tr><th>Waktu</th><th>Aktivitas</th><th>Deskripsi Detail</th><th>Deep Learning</th></tr>
+<tr><td>3'</td><td>Refleksi</td><td>[Pertanyaan refleksi mendalam tentang proses dan hasil belajar]</td><td>🧘 Mindful</td></tr>
+<tr><td>2'</td><td>Kesimpulan</td><td>Guru dan siswa bersama merangkum poin penting pembelajaran</td><td>💡 Meaningful</td></tr>
+<tr><td>2'</td><td>Apresiasi</td><td>[Aktivitas apresiasi: tepuk tangan, shout-out, reward]</td><td>🎉 Joyful</td></tr>
+<tr><td>2'</td><td>Preview</td><td>Guru menyampaikan preview menarik pertemuan berikutnya</td><td>Meaningful</td></tr>
+<tr><td>1'</td><td>Penutup</td><td>Doa penutup dan salam</td><td>Mindful</td></tr>
+</table>
+
+<h3>C. ASESMEN</h3>
+<table>
+<tr><th>Jenis</th><th>Teknik</th><th>Instrumen</th><th>Waktu</th></tr>
+<tr><td>Sikap</td><td>Observasi</td><td>Lembar observasi sikap</td><td>Selama pembelajaran</td></tr>
+<tr><td>Pengetahuan</td><td>${data.jenisAsesmen || "Formatif"}</td><td>${data.bentukAsesmen || "Rubrik"}</td><td>Akhir pembelajaran</td></tr>
+<tr><td>Keterampilan</td><td>Praktik/Produk</td><td>Rubrik keterampilan</td><td>Selama & akhir</td></tr>
+<tr><td>Self-Assessment</td><td>Refleksi</td><td>Jurnal refleksi</td><td>Akhir pembelajaran</td></tr>
+</table>
+
+<h2>LAMPIRAN</h2>
+
+<h3>A. AKTIVITAS ASESMEN</h3>
+[Generate 3 aktivitas asesmen konkret yang sesuai dengan jenis asesmen yang dipilih]
+
+<h3>B. INSTRUMEN ${(data.bentukAsesmen || "RUBRIK").toUpperCase()}</h3>
+<table>
+<tr><th>Aspek</th><th>Sangat Baik (4)</th><th>Baik (3)</th><th>Cukup (2)</th><th>Perlu Bimbingan (1)</th></tr>
+<tr><td><strong>Pemahaman Konsep</strong></td><td>Memahami semua konsep dengan sangat baik dan dapat menjelaskan dengan contoh</td><td>Memahami sebagian besar konsep dengan baik</td><td>Memahami konsep dasar</td><td>Kesulitan memahami konsep</td></tr>
+<tr><td><strong>Penerapan</strong></td><td>Mampu menerapkan dalam berbagai situasi baru secara kreatif</td><td>Mampu menerapkan dalam situasi yang diberikan</td><td>Mampu menerapkan dengan bantuan</td><td>Membutuhkan bimbingan penuh</td></tr>
+<tr><td><strong>Komunikasi</strong></td><td>Menyampaikan ide sangat jelas dan sistematis</td><td>Menyampaikan ide dengan jelas</td><td>Menyampaikan ide kurang sistematis</td><td>Kesulitan menyampaikan ide</td></tr>
+<tr><td><strong>Kolaborasi</strong></td><td>Partisipasi sangat aktif dan membantu teman</td><td>Partisipasi aktif</td><td>Kurang aktif</td><td>Tidak berpartisipasi</td></tr>
+</table>
+
+<h3>C. RUBRIK DEEP LEARNING</h3>
+<table>
+<tr><th>Aspek</th><th>Sangat Baik (4)</th><th>Baik (3)</th><th>Cukup (2)</th><th>Perlu Bimbingan (1)</th></tr>
+<tr><td><strong>🧘 MINDFUL</strong></td><td>Konsisten merefleksikan proses belajar dan menetapkan target</td><td>Sering melakukan refleksi</td><td>Kadang melakukan refleksi</td><td>Memerlukan dukungan untuk refleksi</td></tr>
+<tr><td><strong>💡 MEANINGFUL</strong></td><td>Aktif mengaitkan dengan berbagai konteks kehidupan</td><td>Mampu mengaitkan dengan pengalaman personal</td><td>Membuat koneksi sederhana</td><td>Kesulitan melihat relevansi</td></tr>
+<tr><td><strong>🎉 JOYFUL</strong></td><td>Antusiasme luar biasa dan menikmati pembelajaran</td><td>Keterlibatan baik</td><td>Cukup terlibat</td><td>Kurang menunjukkan kegembiraan</td></tr>
+</table>
+
+<h3>D. LEMBAR KERJA PESERTA DIDIK</h3>
+[Generate LKPD dengan petunjuk, langkah kerja, dan ruang jawaban]
+
+PENTING: Generate SEMUA bagian LENGKAP tanpa placeholder. Setiap tabel harus proporsional dan kompak.`;
+
+        const response = await fetch(OPENAI_API_ENDPOINT, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: OPENAI_MODEL,
+            messages: [
+              {
+                role: "system",
+                content: `Anda adalah ahli pendidikan Indonesia yang sangat berpengalaman dalam menyusun modul ajar Kurikulum Merdeka dengan pendekatan Deep Learning (Mindful, Meaningful, Joyful). 
+
+TUGAS UTAMA:
+1. Hasilkan modul ajar yang LENGKAP, DETAIL, dan KOMPREHENSIF
+2. Setiap aktivitas pembelajaran harus memiliki langkah-langkah yang JELAS dan SPESIFIK
+3. SEMUA tabel harus proporsional dan kompak
+4. TIDAK ADA placeholder - semua konten harus substantif
+5. Output berupa HTML valid dan LENGKAP dari awal hingga akhir
+6. Pastikan output TIDAK TERPOTONG
+
+FORMAT TABEL:
+- Gunakan <table>, <tr>, <th>, <td>
+- Header tabel: <th>
+- Konten tabel: <td>
+- Untuk identity table gunakan class="identity-table"`,
+              },
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            max_tokens: 10000,
+            temperature: 0.7,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`OpenAI API Error: ${response.status} - ${errorData.error?.message || "Unknown error"}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.choices || !result.choices[0] || !result.choices[0].message) {
+          throw new Error("Invalid response format from OpenAI API");
+        }
+
+        let content = result.choices[0].message.content;
+
+        // Clean up markdown code blocks if present
+        content = content.replace(/```html\n?/gi, "").replace(/```\n?/gi, "");
+
+        return content;
+      }
+
+      // =====================================================
+      // RESULT DISPLAY
+      // =====================================================
+      function displayResult(content) {
+        document.getElementById("resultContent").innerHTML = content;
+        document.getElementById("resultSection").classList.add("active");
+        document.getElementById("progressContainer").style.display = "none";
+        document.getElementById("formCard").style.display = "none";
+        document.getElementById("resultSection").scrollIntoView({ behavior: "smooth" });
+      }
+
+      // =====================================================
+      // EXPORT FUNCTIONS
+      // =====================================================
+      function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const contentToExport = document.getElementById("resultContent");
+
+        html2canvas(contentToExport, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+        }).then((canvas) => {
+          const imgData = canvas.toDataURL("image/jpeg", 0.9);
+          const doc = new jsPDF("p", "mm", "a4");
+
+          const pdfWidth = doc.internal.pageSize.getWidth();
+          const pdfHeight = doc.internal.pageSize.getHeight();
+          const margin = 10;
+
+          const imgProps = doc.getImageProperties(imgData);
+          const imgWidth = pdfWidth - margin * 2;
+          const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+          let heightLeft = imgHeight;
+          let position = 0;
+
+          doc.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+          heightLeft -= pdfHeight;
+
+          while (heightLeft > 0) {
+            position -= pdfHeight;
+            doc.addPage();
+            doc.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
+          }
+
+          doc.save("Modul_Ajar_Otomatis.pdf");
+        });
+      }
+
+      function exportToDoc() {
+        // Get the content - keep emoji as is
+        let htmlContent = document.getElementById("resultContent").innerHTML;
+
+        // Replace table headers with inline styles for Word compatibility
+        htmlContent = htmlContent.replace(/<th>/gi, '<th style="background-color:#1e3a8a;color:#ffffff;font-weight:bold;text-align:center;padding:10px 8px;border:1px solid #1e3a8a;font-family:Segoe UI Emoji, Arial, sans-serif;">');
+        htmlContent = htmlContent.replace(/<th /gi, '<th style="background-color:#1e3a8a;color:#ffffff;font-weight:bold;text-align:center;padding:10px 8px;border:1px solid #1e3a8a;font-family:Segoe UI Emoji, Arial, sans-serif;" ');
+
+        // Fix table cells - include emoji font
+        htmlContent = htmlContent.replace(/<td>/gi, '<td style="border:1px solid #9ca3af;padding:8px 10px;vertical-align:top;font-family:Segoe UI Emoji, Times New Roman, serif;">');
+        htmlContent = htmlContent.replace(/<td /gi, '<td style="border:1px solid #9ca3af;padding:8px 10px;vertical-align:top;font-family:Segoe UI Emoji, Times New Roman, serif;" ');
+
+        // Fix tables
+        htmlContent = htmlContent.replace(/<table>/gi, '<table style="width:100%;border-collapse:collapse;margin:12px 0;border:1px solid #1e3a8a;">');
+        htmlContent = htmlContent.replace(/<table /gi, '<table style="width:100%;border-collapse:collapse;margin:12px 0;border:1px solid #1e3a8a;" ');
+
+        const content = `<!DOCTYPE html>
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Modul Ajar Otomatis</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:TrackMoves>false</w:TrackMoves>
+<w:TrackFormatting/>
+<w:PunctuationKerning/>
+<w:ValidateAgainstSchemas/>
+<w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+<w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+<w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+<w:DoNotPromoteQF/>
+<w:LidThemeOther>EN-US</w:LidThemeOther>
+<w:LidThemeAsian>X-NONE</w:LidThemeAsian>
+<w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+<w:Compatibility>
+<w:BreakWrappedTables/>
+<w:SnapToGridInCell/>
+<w:WrapTextWithPunct/>
+<w:UseAsianBreakRules/>
+<w:DontGrowAutofit/>
+<w:SplitPgBreakAndParaMark/>
+<w:EnableOpenTypeKerning/>
+<w:DontFlipMirrorIndents/>
+<w:OverrideTableStyleHps/>
+</w:Compatibility>
+<w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+<m:mathPr>
+<m:mathFont m:val="Cambria Math"/>
+<m:brkBin m:val="before"/>
+<m:brkBinSub m:val="--"/>
+<m:smallFrac m:val="off"/>
+<m:dispDef/>
+<m:lMargin m:val="0"/>
+<m:rMargin m:val="0"/>
+<m:defJc m:val="centerGroup"/>
+<m:wrapIndent m:val="1440"/>
+<m:intLim m:val="subSup"/>
+<m:naryLim m:val="undOvr"/>
+</m:mathPr>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+/* Page Setup - A4 dengan margin 2.54cm (1 inch) semua sisi */
+@page WordSection1 {
+    size: 595.3pt 841.9pt; /* A4 size */
+    margin: 72.0pt 72.0pt 72.0pt 72.0pt; /* 1 inch = 72pt semua sisi */
+    mso-header-margin: 35.4pt;
+    mso-footer-margin: 35.4pt;
+    mso-paper-source: 0;
+}
+
+div.WordSection1 {
+    page: WordSection1;
+}
+
+/* Base Styles */
+body {
+    font-family: 'Segoe UI Emoji', 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #1e293b;
+    background: #ffffff;
+}
+
+/* Headings */
+h1 {
+    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
+    font-size: 16pt;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    margin: 20px 0;
+    color: #000000;
+}
+
+h2 {
+    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
+    font-size: 14pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 20px 0 12px 0;
+    color: #1e3a8a;
+    border-bottom: 2pt solid #1e3a8a;
+    padding-bottom: 5px;
+}
+
+h3 {
+    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 15px 0 8px 0;
+    color: #1e3a5f;
+}
+
+h4 {
+    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 12px 0 6px 0;
+    color: #374151;
+    background-color: #f0f4f8;
+    padding: 8px 12px;
+    border-left: 4pt solid #1e3a8a;
+}
+
+/* Paragraphs */
+p {
+    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
+    margin-bottom: 10px;
+    text-align: justify;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    border: 1pt solid #1e3a8a;
+}
+
+th {
+    font-family: 'Segoe UI Emoji', Arial, sans-serif;
+    background-color: #1e3a8a;
+    color: #ffffff;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 8px;
+    border: 1pt solid #1e3a8a;
+    font-size: 10pt;
+    text-transform: uppercase;
+}
+
+td {
+    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
+    border: 1pt solid #9ca3af;
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+    font-size: 10pt;
+}
+
+tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+/* Identity Table */
+.identity-table {
+    border: 1pt solid #9ca3af;
+}
+
+.identity-table td {
+    border: 1pt solid #d1d5db;
+    padding: 8px 12px;
+}
+
+.identity-table td:first-child {
+    width: 160px;
+    font-weight: bold;
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+/* Lists */
+ul, ol {
+    margin: 12px 0 12px 30px;
+    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
+}
+
+li {
+    margin-bottom: 6px;
+    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
+}
+
+/* Strong and Bold */
+strong, b {
+    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
+    font-weight: bold;
+}
+</style>
+</head>
+<body lang=EN-US style='tab-interval:36.0pt'>
+<div class="WordSection1">
+${htmlContent}
+</div>
+</body>
+</html>`;
+
+        // Add BOM for proper UTF-8 encoding in Word
+        const BOM = "\uFEFF";
+        const blob = new Blob([BOM + content], { type: "application/msword;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Modul_Ajar_PRIMA.doc";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // =====================================================
+      // RESET & NEW FORM
+      // =====================================================
+      function generateNew() {
+        document.getElementById("resultSection").classList.remove("active");
+        document.getElementById("progressContainer").style.display = "block";
+        document.getElementById("formCard").style.display = "block";
+        document.getElementById("modulForm").reset();
+
+        selectedDimensions = [];
+        updateDimensionsDisplay();
+        lastFormData = null;
+
+        currentStep = 1;
+        updateStepDisplay();
+        updateProgressBar();
+
+        document.getElementById("tahunPenyusunan").value = new Date().getFullYear().toString();
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      window.addEventListener("resize", updateProgressBar);
+    </script>
+  </body>
+</html>
