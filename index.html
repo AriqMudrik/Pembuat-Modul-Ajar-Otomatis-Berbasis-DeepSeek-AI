@@ -1417,9 +1417,8 @@
       let lastFormData = null;
 
       // API Configuration
-      const OPENROUTER_API_KEY  = "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";
-      const OPENAI_API_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
-      const OPENAI_MODEL = "deepseek/deepseek-chat";
+     
+      const OPENAI_API_ENDPOINT = "/api/generate";
 
       // Progress tracking
       let progressInterval = null;
@@ -1983,15 +1982,13 @@ ${
 
 PENTING: Generate SEMUA bagian LENGKAP tanpa placeholder. Setiap tabel harus proporsional dan kompak.`;
 
-        const response = await fetch(OPENAI_API_ENDPOINT, {
+        const response = await fetch("/api/generate", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-            "HTTP-Referer": "https://pembuat-modul-ajar-otomatis.vercel.app",
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: OPENAI_MODEL,
+            model: deepseek/deepseek-chat,
             messages: [
               {
                 role: "system",
@@ -2348,6 +2345,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
