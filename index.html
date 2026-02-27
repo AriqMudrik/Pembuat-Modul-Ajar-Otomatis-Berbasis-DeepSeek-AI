@@ -1987,6 +1987,7 @@ PENTING: Generate SEMUA bagian LENGKAP tanpa placeholder. Setiap tabel harus pro
           method: "POST",
           headers: {
             Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+            "HTTP-Referer": "https://pembuat-modul-ajar-otomatis.vercel.app",
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -2015,7 +2016,7 @@ FORMAT TABEL:
                 content: prompt,
               },
             ],
-            max_tokens: 10000,
+            max_tokens: 4000,
             temperature: 0.7,
           }),
         });
@@ -2347,6 +2348,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
