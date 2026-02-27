@@ -1417,7 +1417,7 @@
       let lastFormData = null;
 
       // API Configuration
-      const OPENAI_API_KEY = "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";
+      const OPENROUTER_API_KEY  = "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";
       const OPENAI_API_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
       const OPENAI_MODEL = "deepseek/deepseek-chat";
 
@@ -1986,7 +1986,7 @@ PENTING: Generate SEMUA bagian LENGKAP tanpa placeholder. Setiap tabel harus pro
         const response = await fetch(OPENAI_API_ENDPOINT, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            Authorization: `Bearer ${OPENROUTER_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -2347,5 +2347,6 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
