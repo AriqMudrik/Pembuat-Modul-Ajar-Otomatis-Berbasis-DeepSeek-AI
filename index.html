@@ -1812,6 +1812,7 @@ INSTRUKSI PENTING:
 3. Setiap fase kegiatan inti harus mencakup: waktu, aktivitas guru, aktivitas siswa, dan integrasi Deep Learning
 4. JANGAN gunakan placeholder atau teks dalam kurung siku
 5. Semua konten harus substantif dan actionable
+6. Jikalau pada KOMPONEN INTI ada fase ke 6 maka tambahkan jika tidak beri tanda - dan tidak perlu di generate
 
 FORMAT HTML WAJIB:
 
@@ -1917,6 +1918,13 @@ FORMAT HTML WAJIB:
 <td>[Aktivitas guru: membantu generalisasi, menghubungkan dengan konteks lain, memberikan penguatan]</td>
 <td>[Aktivitas siswa: mempresentasikan, menanggapi, membuat generalisasi, aplikasi konsep]</td>
 <td>🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration</td>
+</tr>
+<tr>
+<td><strong>fase</strong></td>
+<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 </table>
 
@@ -2345,6 +2353,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
