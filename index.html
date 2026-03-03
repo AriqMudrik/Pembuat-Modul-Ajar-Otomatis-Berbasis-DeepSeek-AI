@@ -2026,11 +2026,11 @@ console.log("===== DEBUG RESPONSE =====");
 console.log("Status:", response.status);
 console.log("Data:", JSON.stringify(data, null, 2));
 console.log("==========================");
-        if (!result.choices || !result.choices[0] || !result.choices[0].message) {
-          throw new Error("Invalid response format from OpenAI API");
+        if (!result) {
+          throw new Error("Response kosong dari API");
         }
-
-        let content = result.choices[0].message.content;
+        
+        let content = result.content || result;
 
         // Clean up markdown code blocks if present
         content = content.replace(/```html\n?/gi, "").replace(/```\n?/gi, "");
@@ -2346,6 +2346,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
