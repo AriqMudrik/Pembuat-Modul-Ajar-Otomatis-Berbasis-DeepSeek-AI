@@ -2020,24 +2020,29 @@ FORMAT TABEL:
           throw new Error(`OpenAI API Error: ${response.status} - ${errorData.error?.message || "Unknown error"}`);
         }
 
-        const result = await response.json();
+      const result = await response.json();
 
-console.log("===== DEBUG RESPONSE =====");
-console.log("Status:", response.status);
-console.log("Data:", JSON.stringify(data, null, 2));
-console.log("==========================");
-       let content;
-
-        if (result?.choices?.[0]?.message?.content) {
-          content = result.choices[0].message.content;
-        } else if (result?.content) {
-          content = result.content;
-        } else if (typeof result === "string") {
-          content = result;
-        } else {
-          console.error("Format tidak dikenali:", result);
-          throw new Error("Format response tidak sesuai");
-        }
+      console.log("===== DEBUG RESPONSE =====");
+      console.log("Status:", response.status);
+      console.log("Result:", result);
+      console.log("==========================");
+      
+      if (!response.ok) {
+        throw new Error(result?.error?.message || "API Error");
+      }
+      
+      // ✅ Parsing yang benar
+      if (!result?.choices?.[0]?.message?.content) {
+        console.error("Format tidak sesuai:", result);
+        throw new Error("Format response tidak sesuai dari API");
+      }
+      
+      let content = result.choices[0].message.content;
+      
+      // Bersihkan markdown jika ada
+      content = content.replace(/```html\n?/gi, "").replace(/```\n?/gi, "");
+      
+      return content;
 
         // Clean up markdown code blocks if present
         content = content.replace(/```html\n?/gi, "").replace(/```\n?/gi, "");
@@ -2353,6 +2358,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
