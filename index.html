@@ -1106,7 +1106,8 @@
           <div class="logo-icon">🎓</div>
           <span class="logo-text">Pembuatan Modul Ajar Otomatis</span>
         </div>
-        <p>Platform Rancang Instan Modul Ajar - Kurikulum Merdeka</p>
+         <p>Platform Rancang Instan Modul Ajar - Kurikulum Merdeka</p><br>
+        <a href="https://forms.gle/UdiDzRNxa6usvQX86">Link Uji Kelayakan Website</a>
       </header>
 
       <!-- Progress Bar -->
@@ -1190,8 +1191,21 @@
                 <label><span class="icon">📚</span> Mata Pelajaran</label>
                 <select id="mataPelajaran">
                   <option value="">Pilih Mata Pelajaran</option>
+                  <option value="Pendidikan Agama dan Budi Pekerti">Informatika</option>
                   <option value="Infomatika">Informatika</option>
-                  <option value="Bahasa-Indonesia">Bahasa Indonesia</option>
+                  <option value="Seni Budaya">Seni Budaya</option>
+                  <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                  <option value="Dasar Program Keahlian">Dasar Program Keahlian</option>
+                  <option value="Pendidikan Jasmani, Olahraga dan Kesehatan">PJOK</option>
+                  <option value="Matematika">Matematika</option>
+                  <option value="Pendidikan Pancasila dan Kewarganegaraan">PPKN</option>
+                  <option value="Bahasa Jawa">Bahasa Jawa</option>
+                  <option value="Bahasa Inggris">Bahasa Inggris</option>
+                  <option value="Mata Pelajaran Pilihan">Mata Pelajaran Pilihan</option>
+                  <option value="Projek Ilmu Pengetahuan Alam dan Sosial">Projek Ilmu Pengetahuan Alam dan Sosial</option>
+                  <option value="Mata Pelajaran Konsentrasi Keahlian">Mata Pelajaran Konsentrasi Keahlian</option>
+                  <option value="Sejarah Indonesia">Sejarah Indonesia</option>
+                  <option value="Kreativitas Inovasi dan Kewiraushaan">Kreativitas Inovasi dan Kewiraushaan</option>
                 </select>
               </div>
 
@@ -1813,7 +1827,7 @@ INSTRUKSI PENTING:
 3. Setiap fase kegiatan inti harus mencakup: waktu, aktivitas guru, aktivitas siswa, dan integrasi Deep Learning
 4. JANGAN gunakan placeholder atau teks dalam kurung siku
 5. Semua konten harus substantif dan actionable
-6. Jikalau pada KOMPONEN INTI ada fase ke 6 maka tambahkan jika tidak beri tanda - dan tidak perlu di generate
+6. pada komponen inti jika tidak menggunakan fase 6 maka kosongkan atau kasih -
 
 FORMAT HTML WAJIB:
 
@@ -1921,11 +1935,11 @@ FORMAT HTML WAJIB:
 <td>🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration</td>
 </tr>
 <tr>
-<td><strong>fase</strong></td>
+<td><strong>fase </strong></td>
 <td>${Math.round(waktuDetail.inti * 0.2)}'</td>
-<td></td>
-<td></td>
-<td></td>
+<td>[Aktivitas Guru: membantu mengevaluasi , menghubungkan dengan konteks lain, memberikan penguatan]</td>
+<td>[Aktivitas Siswa: Refleksi/ mengevaluasi, kembangkan]</td>
+<td>[🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration]</td>
 </tr>
 </table>
 
@@ -1985,6 +1999,9 @@ ${
 <tr><td><strong>💡 MEANINGFUL</strong></td><td>Aktif mengaitkan dengan berbagai konteks kehidupan</td><td>Mampu mengaitkan dengan pengalaman personal</td><td>Membuat koneksi sederhana</td><td>Kesulitan melihat relevansi</td></tr>
 <tr><td><strong>🎉 JOYFUL</strong></td><td>Antusiasme luar biasa dan menikmati pembelajaran</td><td>Keterlibatan baik</td><td>Cukup terlibat</td><td>Kurang menunjukkan kegembiraan</td></tr>
 </table>
+
+<h3>D. CONTOH SOAL </h3>
+[Generate Contoh soal minimal 5 sesuai dengan ${data.bentukAsesmen}]
 
 <h3>D. LEMBAR KERJA PESERTA DIDIK</h3>
 [Generate LKPD dengan petunjuk, langkah kerja, dan ruang jawaban]
@@ -2354,6 +2371,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
