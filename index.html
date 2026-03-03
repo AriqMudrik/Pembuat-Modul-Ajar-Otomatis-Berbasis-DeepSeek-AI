@@ -56,15 +56,14 @@
       }
 
       .bg-animation::before {
-      content: "";
+        content: "";
         position: absolute;
         top: -50%;
         left: -50%;
         width: 200%;
         height: 200%;
         background:
-          radial-gradient(circle at 20% 80%, rgba(184, 134, 11, 0.15) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(212, 160, 23, 0.12) 0%, transparent 50%),
+          radial-gradient(circle at 20% 80%, rgba(184, 134, 11, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(212, 160, 23, 0.12) 0%, transparent 50%),
           radial-gradient(circle at 40% 40%, rgba(230, 184, 0, 0.1) 0%, transparent 40%);
         animation: bgRotate 30s linear infinite;
       }
@@ -292,7 +291,7 @@
 
       /* Form Card */
       .form-card {
-       background: #ffffff;
+        background: #ffffff;
         border-radius: 24px;
         padding: 40px;
         border: 1px solid #f3e6c4;
@@ -424,7 +423,6 @@
 
       /* FIXED: Dropdown styling with visible icons */
       .form-group select option {
-       
         color: #000000;
         padding: 12px 16px;
         font-weight: 500;
@@ -594,7 +592,7 @@
 
       .btn-primary:hover {
         transform: translateY(-3px);
-       box-shadow: 0 8px 24px rgba(184, 134, 11, 0.3);
+        box-shadow: 0 8px 24px rgba(184, 134, 11, 0.3);
       }
 
       .btn-generate {
@@ -858,12 +856,12 @@
 
       .result-content h2 {
         font-size: 14pt;
-      font-weight: bold;
-      margin: 24px 0 14px 0;
-      color: #8b6508;
-      text-transform: uppercase;
-      border-bottom: 2px solid #b8860b;
-      padding-bottom: 8px;
+        font-weight: bold;
+        margin: 24px 0 14px 0;
+        color: #8b6508;
+        text-transform: uppercase;
+        border-bottom: 2px solid #b8860b;
+        padding-bottom: 8px;
       }
 
       .result-content h3 {
@@ -1071,7 +1069,6 @@
     </style>
   </head>
   <body>
-
     <!-- Animated Background -->
     <div class="bg-animation">
       <div class="floating-orb orb-1"></div>
@@ -1106,8 +1103,7 @@
           <div class="logo-icon">🎓</div>
           <span class="logo-text">Pembuatan Modul Ajar Otomatis</span>
         </div>
-         <p>Platform Rancang Instan Modul Ajar - Kurikulum Merdeka</p><br>
-        <a href="https://forms.gle/YHY89h29SZT2XNcC6">Link Uji Kelayakan Website</a>
+        <p>Platform Rancang Instan Modul Ajar - Kurikulum Merdeka</p>
       </header>
 
       <!-- Progress Bar -->
@@ -1191,21 +1187,7 @@
                 <label><span class="icon">📚</span> Mata Pelajaran</label>
                 <select id="mataPelajaran">
                   <option value="">Pilih Mata Pelajaran</option>
-                  <option value="Pendidikan Agama dan Budi Pekerti">Pendidikan Agama dan Budi Pekerti</option>
                   <option value="Infomatika">Informatika</option>
-                  <option value="Seni Budaya">Seni Budaya</option>
-                  <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-                  <option value="Dasar Program Keahlian">Dasar Program Keahlian</option>
-                  <option value="Pendidikan Jasmani, Olahraga dan Kesehatan">PJOK</option>
-                  <option value="Matematika">Matematika</option>
-                  <option value="Pendidikan Pancasila dan Kewarganegaraan">PPKN</option>
-                  <option value="Bahasa Jawa">Bahasa Jawa</option>
-                  <option value="Bahasa Inggris">Bahasa Inggris</option>
-                  <option value="Mata Pelajaran Pilihan">Mata Pelajaran Pilihan</option>
-                  <option value="Projek Ilmu Pengetahuan Alam dan Sosial">Projek Ilmu Pengetahuan Alam dan Sosial</option>
-                  <option value="Mata Pelajaran Konsentrasi Keahlian">Mata Pelajaran Konsentrasi Keahlian</option>
-                  <option value="Sejarah Indonesia">Sejarah Indonesia</option>
-                  <option value="Kreativitas Inovasi dan Kewiraushaan">Kreativitas Inovasi dan Kewiraushaan</option>
                 </select>
               </div>
 
@@ -1221,7 +1203,6 @@
                   <option value="Fase F (Kelas 11-12)">Fase F (Kelas 11-12)</option>
                 </select>
               </div>
-
 
               <div class="form-group">
                 <label><span class="icon">💡</span> Topik Pembelajaran</label>
@@ -1269,21 +1250,21 @@
               <div class="form-group">
                 <label><span class="icon">🎯</span> Model Pembelajaran</label>
                 <select id="modelPembelajaran">
-                   <option value="">Pilih Model</option>
-              
-                    <option value="Problem Based Learning">📝 Problem Based Learning (PBL)</option>
+                  <option value="">Pilih Model</option>
 
-                    <option value="Project Based Learning">🏗️ Project Based Learning (PjBL)</option>
+                  <option value="Problem Based Learning">📝 Problem Based Learning (PBL)</option>
 
-                    <option value="Discovery Learning">🔍 Discovery Learning</option>
+                  <option value="Project Based Learning">🏗️ Project Based Learning (PjBL)</option>
 
-                    <option value="Inquiry Learning">❓ Inquiry Learning</option>
+                  <option value="Discovery Learning">🔍 Discovery Learning</option>
 
-                    <option value="Flipped Classroom - Standard">🔄 Flipped Classroom</option>
+                  <option value="Inquiry Learning">❓ Inquiry Learning</option>
 
-                    <option value="Cooperative Learning - STAD">👥 Cooperative Learning</option>
-                    
-                    <option value="Direct Instruction">📋 Direct Instruction</option>
+                  <option value="Flipped Classroom - Standard">🔄 Flipped Classroom</option>
+
+                  <option value="Cooperative Learning - STAD">👥 Cooperative Learning</option>
+
+                  <option value="Direct Instruction">📋 Direct Instruction</option>
                 </select>
               </div>
 
@@ -1432,8 +1413,9 @@
       let lastFormData = null;
 
       // API Configuration
-     
-      const OPENAI_API_ENDPOINT = "/api/generate";
+      const OPENAI_API_KEY = "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";
+      const OPENAI_API_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+      const OPENAI_MODEL = "deepseek/deepseek-chat";
 
       // Progress tracking
       let progressInterval = null;
@@ -1677,8 +1659,8 @@
                         <span class="review-value ${!formData.contextTambahan ? "empty" : ""}">${formData.contextTambahan || "Tidak ada"}</span>
                     </div>
                     <div class="review-item">
-                       <span class="review-label">AI Integration</span>
-                       <span class="review-value">${formData.aiIntegrationActivity ? "✅ Aktif" : "❌ Tidak aktif"}</span>
+                        <span class="review-label">AI Integration</span>
+                        <span class="review-value">${formData.aiIntegrationActivity ? "✅ Aktif" : "❌ Tidak aktif"}</span>
                     </div>
                 </div>
             `;
@@ -1827,7 +1809,6 @@ INSTRUKSI PENTING:
 3. Setiap fase kegiatan inti harus mencakup: waktu, aktivitas guru, aktivitas siswa, dan integrasi Deep Learning
 4. JANGAN gunakan placeholder atau teks dalam kurung siku
 5. Semua konten harus substantif dan actionable
-6. pada komponen inti jika tidak menggunakan fase 6 maka kosongkan atau kasih -
 
 FORMAT HTML WAJIB:
 
@@ -1934,13 +1915,6 @@ FORMAT HTML WAJIB:
 <td>[Aktivitas siswa: mempresentasikan, menanggapi, membuat generalisasi, aplikasi konsep]</td>
 <td>🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration</td>
 </tr>
-<tr>
-<td><strong>fase </strong></td>
-<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
-<td>[Aktivitas Guru: membantu mengevaluasi , menghubungkan dengan konteks lain, memberikan penguatan]</td>
-<td>[Aktivitas Siswa: Refleksi/ mengevaluasi, kembangkan]</td>
-<td>[🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration]</td>
-</tr>
 </table>
 
 ${
@@ -2000,21 +1974,19 @@ ${
 <tr><td><strong>🎉 JOYFUL</strong></td><td>Antusiasme luar biasa dan menikmati pembelajaran</td><td>Keterlibatan baik</td><td>Cukup terlibat</td><td>Kurang menunjukkan kegembiraan</td></tr>
 </table>
 
-<h3>D. CONTOH SOAL </h3>
-[Generate Contoh soal minimal 5 sesuai dengan ${data.bentukAsesmen}]
-
 <h3>D. LEMBAR KERJA PESERTA DIDIK</h3>
 [Generate LKPD dengan petunjuk, langkah kerja, dan ruang jawaban]
 
 PENTING: Generate SEMUA bagian LENGKAP tanpa placeholder. Setiap tabel harus proporsional dan kompak.`;
 
-        const response = await fetch("/api/generate", {
+        const response = await fetch(OPENAI_API_ENDPOINT, {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "deepseek/deepseek-chat",
+            model: OPENAI_MODEL,
             messages: [
               {
                 role: "system",
@@ -2039,7 +2011,7 @@ FORMAT TABEL:
                 content: prompt,
               },
             ],
-            max_tokens: 4000,
+            max_tokens: 10000,
             temperature: 0.7,
           }),
         });
@@ -2371,21 +2343,3 @@ ${htmlContent}
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
