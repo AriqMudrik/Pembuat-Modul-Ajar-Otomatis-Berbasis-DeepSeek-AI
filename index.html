@@ -1187,8 +1187,21 @@
                 <label><span class="icon">📚</span> Mata Pelajaran</label>
                 <select id="mataPelajaran">
                   <option value="">Pilih Mata Pelajaran</option>
+                 <option value="Pendidikan Agama dan Budi Pekerti">Pendidikan Agama dan Budi Pekerti</option>
                   <option value="Infomatika">Informatika</option>
+                  <option value="Seni Budaya">Seni Budaya</option>
                   <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                  <option value="Dasar Program Keahlian">Dasar Program Keahlian</option>
+                  <option value="Pendidikan Jasmani, Olahraga dan Kesehatan">PJOK</option>
+                  <option value="Matematika">Matematika</option>
+                  <option value="Pendidikan Pancasila dan Kewarganegaraan">PPKN</option>
+                  <option value="Bahasa Jawa">Bahasa Jawa</option>
+                  <option value="Bahasa Inggris">Bahasa Inggris</option>
+                  <option value="Mata Pelajaran Pilihan">Mata Pelajaran Pilihan</option>
+                  <option value="Projek Ilmu Pengetahuan Alam dan Sosial">Projek Ilmu Pengetahuan Alam dan Sosial</option>
+                  <option value="Mata Pelajaran Konsentrasi Keahlian">Mata Pelajaran Konsentrasi Keahlian</option>
+                  <option value="Sejarah Indonesia">Sejarah Indonesia</option>
+                  <option value="Kreativitas Inovasi dan Kewiraushaan">Kreativitas Inovasi dan Kewiraushaan</option>
                 </select>
               </div>
 
@@ -1809,6 +1822,7 @@ INSTRUKSI PENTING:
 3. Setiap fase kegiatan inti harus mencakup: waktu, aktivitas guru, aktivitas siswa, dan integrasi Deep Learning
 4. JANGAN gunakan placeholder atau teks dalam kurung siku
 5. Semua konten harus substantif dan actionable
+6. pada komponen inti jika tidak menggunakan fase 6 maka kosongkan atau kasih -
 
 FORMAT HTML WAJIB:
 
@@ -1914,6 +1928,13 @@ FORMAT HTML WAJIB:
 <td>[Aktivitas guru: membantu generalisasi, menghubungkan dengan konteks lain, memberikan penguatan]</td>
 <td>[Aktivitas siswa: mempresentasikan, menanggapi, membuat generalisasi, aplikasi konsep]</td>
 <td>🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration</td>
+</tr>
+<tr>
+<td><strong>fase </strong></td>
+<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
+<td>[Aktivitas Guru: membantu mengevaluasi , menghubungkan dengan konteks lain, memberikan penguatan]</td>
+<td>[Aktivitas Siswa: Refleksi/ mengevaluasi, kembangkan]</td>
+<td>[🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration]</td>
 </tr>
 </table>
 
@@ -2358,6 +2379,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
