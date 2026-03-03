@@ -1366,7 +1366,7 @@
                 <textarea id="contextTambahan" rows="3" placeholder="Tambahkan informasi khusus tentang pembelajaran ini, misalnya karakteristik siswa, kondisi sekolah, atau kebutuhan khusus..."></textarea>
               </div>
 
-              <!-- <div class="form-group full-width">
+              <div class="form-group full-width">
                 <label class="checkbox-wrapper">
                   <input type="checkbox" id="aiIntegrationActivity" />
                   <div class="checkbox-content">
@@ -1374,7 +1374,7 @@
                     <p>Centang untuk menambahkan aktivitas pembelajaran yang melibatkan penggunaan Deeplearning pada DeepSeek AI</p>
                   </div>
                 </label>
-              </div> -->
+              </div>
             </div>
 
             <div class="nav-buttons">
@@ -1676,10 +1676,10 @@
                         <span class="review-label">Konteks Tambahan</span>
                         <span class="review-value ${!formData.contextTambahan ? "empty" : ""}">${formData.contextTambahan || "Tidak ada"}</span>
                     </div>
-                    // <div class="review-item">
-                    //    <span class="review-label">AI Integration</span>
-                    //    <span class="review-value">${formData.aiIntegrationActivity ? "✅ Aktif" : "❌ Tidak aktif"}</span>
-                    // </div>
+                    <div class="review-item">
+                       <span class="review-label">AI Integration</span>
+                       <span class="review-value">${formData.aiIntegrationActivity ? "✅ Aktif" : "❌ Tidak aktif"}</span>
+                    </div>
                 </div>
             `;
       }
@@ -2371,6 +2371,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
