@@ -2026,11 +2026,18 @@ console.log("===== DEBUG RESPONSE =====");
 console.log("Status:", response.status);
 console.log("Data:", JSON.stringify(data, null, 2));
 console.log("==========================");
-        if (!result) {
-          throw new Error("Response kosong dari API");
+       let content;
+
+        if (result?.choices?.[0]?.message?.content) {
+          content = result.choices[0].message.content;
+        } else if (result?.content) {
+          content = result.content;
+        } else if (typeof result === "string") {
+          content = result;
+        } else {
+          console.error("Format tidak dikenali:", result);
+          throw new Error("Format response tidak sesuai");
         }
-        
-        let content = result.content || result;
 
         // Clean up markdown code blocks if present
         content = content.replace(/```html\n?/gi, "").replace(/```\n?/gi, "");
@@ -2346,6 +2353,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
