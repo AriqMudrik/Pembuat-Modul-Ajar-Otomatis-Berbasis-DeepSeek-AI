@@ -2022,6 +2022,10 @@ FORMAT TABEL:
 
         const result = await response.json();
 
+console.log("===== DEBUG RESPONSE =====");
+console.log("Status:", response.status);
+console.log("Data:", JSON.stringify(data, null, 2));
+console.log("==========================");
         if (!result.choices || !result.choices[0] || !result.choices[0].message) {
           throw new Error("Invalid response format from OpenAI API");
         }
@@ -2342,6 +2346,7 @@ ${htmlContent}
     </script>
   </body>
 </html>
+
 
 
 
