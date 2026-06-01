@@ -1417,384 +1417,458 @@
     </div>
 
     <script>
-      // =====================================================
-      // STATE MANAGEMENT
-      // =====================================================
-      let currentStep = 1;
-      const totalSteps = 4;
-      let selectedDimensions = [];
-      let generatedContent = "";
-      let lastFormData = null;
+     // =====================================================
+// STATE MANAGEMENT
+// =====================================================
+let currentStep = 1;
+const totalSteps = 4;
+let selectedDimensions = [];
+let generatedContent = "";
+let lastFormData = null;
 
-      // API Configuration
-      const OPENAI_API_ENDPOINT  = "/api/generate";
-    ;
+// API Configuration
+const OPENAI_API_ENDPOINT = "/api/generate";
 
-      // Progress tracking
-      let progressInterval = null;
+// Progress tracking
+let progressInterval = null;
 
-      // =====================================================
-      // INITIALIZATION
-      // =====================================================
-      document.addEventListener("DOMContentLoaded", function () {
-        document.getElementById("tahunPenyusunan").value = new Date().getFullYear().toString();
-        initDimensionSelect();
-        updateProgressBar();
-      });
+// =====================================================
+// INITIALIZATION
+// =====================================================
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("tahunPenyusunan").value = new Date().getFullYear().toString();
+  initDimensionSelect();
+  updateProgressBar();
+});
 
-      // =====================================================
-      // PROGRESS ANIMATION
-      // =====================================================
-      const progressStages = [
-        { percent: 5, status: "Memulai proses..." },
-        { percent: 10, status: "Menghubungkan ke AI..." },
-        { percent: 15, status: "Mengirim data pembelajaran..." },
-        { percent: 25, status: "AI sedang menganalisis konteks..." },
-        { percent: 35, status: "Menyusun struktur modul..." },
-        { percent: 45, status: "Mengintegrasikan Deep Learning..." },
-        { percent: 55, status: "Membuat kegiatan pembelajaran detail..." },
-        { percent: 65, status: "Menyusun langkah-langkah aktivitas..." },
-        { percent: 72, status: "Membuat instrumen asesmen..." },
-        { percent: 80, status: "Membuat lampiran dan rubrik..." },
-        { percent: 88, status: "Finalisasi modul ajar..." },
-        { percent: 94, status: "Memvalidasi output..." },
-        { percent: 97, status: "Hampir selesai..." },
-      ];
+// =====================================================
+// PROGRESS ANIMATION
+// =====================================================
+const progressStages = [
+  { percent: 5, status: "Memulai proses..." },
+  { percent: 10, status: "Menghubungkan ke AI..." },
+  { percent: 15, status: "Mengirim data pembelajaran..." },
+  { percent: 25, status: "AI sedang menganalisis konteks..." },
+  { percent: 35, status: "Menyusun struktur modul..." },
+  { percent: 45, status: "Mengintegrasikan Deep Learning..." },
+  { percent: 55, status: "Membuat kegiatan pembelajaran detail..." },
+  { percent: 65, status: "Menyusun langkah-langkah aktivitas..." },
+  { percent: 72, status: "Membuat instrumen asesmen..." },
+  { percent: 80, status: "Membuat lampiran dan rubrik..." },
+  { percent: 88, status: "Finalisasi modul ajar..." },
+  { percent: 94, status: "Memvalidasi output..." },
+  { percent: 97, status: "Hampir selesai..." },
+];
 
-      function updateProgress(percent, status) {
-        document.getElementById("progressBarFill").style.width = percent + "%";
-        document.getElementById("progressPercentage").textContent = percent + "%";
-        document.getElementById("progressStatus").textContent = status;
-      }
+function updateProgress(percent, status) {
+  document.getElementById("progressBarFill").style.width = percent + "%";
+  document.getElementById("progressPercentage").textContent = percent + "%";
+  document.getElementById("progressStatus").textContent = status;
+}
 
-      function startProgressAnimation() {
-        let currentStage = 0;
-        updateProgress(0, "Memulai proses...");
+function startProgressAnimation() {
+  let currentStage = 0;
+  updateProgress(0, "Memulai proses...");
+  progressInterval = setInterval(() => {
+    if (currentStage < progressStages.length) {
+      const stage = progressStages[currentStage];
+      updateProgress(stage.percent, stage.status);
+      currentStage++;
+    }
+  }, 2000);
+}
 
-        progressInterval = setInterval(() => {
-          if (currentStage < progressStages.length) {
-            const stage = progressStages[currentStage];
-            updateProgress(stage.percent, stage.status);
-            currentStage++;
-          }
-        }, 2000);
-      }
+function stopProgressAnimation() {
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = null;
+  }
+  updateProgress(100, "Selesai! ✓");
+}
 
-      function stopProgressAnimation() {
-        if (progressInterval) {
-          clearInterval(progressInterval);
-          progressInterval = null;
-        }
-        updateProgress(100, "Selesai! ✓");
-      }
+function resetProgress() {
+  updateProgress(0, "Memulai proses...");
+}
 
-      function resetProgress() {
-        updateProgress(0, "Memulai proses...");
-      }
+// =====================================================
+// MULTI-SELECT FUNCTIONALITY
+// =====================================================
+function initDimensionSelect() {
+  const select = document.getElementById("profilLulusan");
+  select.addEventListener("change", function () {
+    const value = this.value;
+    const text = this.options[this.selectedIndex].text;
+    if (value && !selectedDimensions.some((d) => d.value === value)) {
+      selectedDimensions.push({ value, text });
+      updateDimensionsDisplay();
+    }
+    this.selectedIndex = 0;
+  });
+}
 
-      // =====================================================
-      // MULTI-SELECT FUNCTIONALITY
-      // =====================================================
-      function initDimensionSelect() {
-        const select = document.getElementById("profilLulusan");
+function updateDimensionsDisplay() {
+  const container = document.getElementById("selectedDimensionsContainer");
+  if (selectedDimensions.length === 0) {
+    container.innerHTML = '<span class="empty-selection">Belum ada dimensi yang dipilih</span>';
+  } else {
+    container.innerHTML = selectedDimensions
+      .map(
+        (dim, index) => `
+          <span class="selected-item-tag">
+            ${dim.text}
+            <span class="remove-tag" onclick="removeDimension(${index})">×</span>
+          </span>
+        `
+      )
+      .join("");
+  }
+}
 
-        select.addEventListener("change", function () {
-          const value = this.value;
-          const text = this.options[this.selectedIndex].text;
+function removeDimension(index) {
+  selectedDimensions.splice(index, 1);
+  updateDimensionsDisplay();
+}
 
-          if (value && !selectedDimensions.some((d) => d.value === value)) {
-            selectedDimensions.push({ value, text });
-            updateDimensionsDisplay();
-          }
+// =====================================================
+// STEP NAVIGATION
+// =====================================================
+function goToStep(step) {
+  if (step > currentStep) return;
+  currentStep = step;
+  updateStepDisplay();
+  updateProgressBar();
+}
 
-          this.selectedIndex = 0;
-        });
-      }
+function nextStep() {
+  if (currentStep < totalSteps) {
+    currentStep++;
+    updateStepDisplay();
+    updateProgressBar();
+    if (currentStep === totalSteps) {
+      generateReviewContent();
+    }
+  }
+}
 
-      function updateDimensionsDisplay() {
-        const container = document.getElementById("selectedDimensionsContainer");
+function prevStep() {
+  if (currentStep > 1) {
+    currentStep--;
+    updateStepDisplay();
+    updateProgressBar();
+  }
+}
 
-        if (selectedDimensions.length === 0) {
-          container.innerHTML = '<span class="empty-selection">Belum ada dimensi yang dipilih</span>';
-        } else {
-          container.innerHTML = selectedDimensions
-            .map(
-              (dim, index) => `
-                    <span class="selected-item-tag">
-                        ${dim.text}
-                        <span class="remove-tag" onclick="removeDimension(${index})">×</span>
-                    </span>
-                `,
-            )
-            .join("");
-        }
-      }
+function updateStepDisplay() {
+  document.querySelectorAll(".step-content").forEach((content) => {
+    content.classList.remove("active");
+  });
+  document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.add("active");
+  document.querySelectorAll(".step-item").forEach((item) => {
+    const itemStep = parseInt(item.dataset.step);
+    item.classList.remove("active", "completed");
+    if (itemStep === currentStep) {
+      item.classList.add("active");
+    } else if (itemStep < currentStep) {
+      item.classList.add("completed");
+    }
+  });
+  document.getElementById("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
-      function removeDimension(index) {
-        selectedDimensions.splice(index, 1);
-        updateDimensionsDisplay();
-      }
+function updateProgressBar() {
+  const progressLine = document.getElementById("progressLine");
+  const percentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+  const maxWidth = document.querySelector(".progress-steps").offsetWidth - 80;
+  progressLine.style.width = `${(percentage / 100) * maxWidth}px`;
+}
 
-      // =====================================================
-      // STEP NAVIGATION
-      // =====================================================
-      function goToStep(step) {
-        if (step > currentStep) return;
-        currentStep = step;
-        updateStepDisplay();
-        updateProgressBar();
-      }
+// =====================================================
+// REVIEW CONTENT GENERATION
+// =====================================================
+function generateReviewContent() {
+  const reviewContainer = document.getElementById("reviewContent");
+  const formData = getFormData();
 
-      function nextStep() {
-        if (currentStep < totalSteps) {
-          currentStep++;
-          updateStepDisplay();
-          updateProgressBar();
+  reviewContainer.innerHTML = `
+    <div class="review-section">
+      <h3>📋 Identitas Modul</h3>
+      <div class="review-item">
+        <span class="review-label">Penyusun</span>
+        <span class="review-value ${!formData.penyusun ? "empty" : ""}">${formData.penyusun || "Belum diisi"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Instansi</span>
+        <span class="review-value ${!formData.instansi ? "empty" : ""}">${formData.instansi || "Belum diisi"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Tahun Penyusunan</span>
+        <span class="review-value ${!formData.tahunPenyusunan ? "empty" : ""}">${formData.tahunPenyusunan || "Belum dipilih"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Jenjang Sekolah</span>
+        <span class="review-value ${!formData.jenjangSekolah ? "empty" : ""}">${formData.jenjangSekolah || "Belum dipilih"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Mata Pelajaran</span>
+        <span class="review-value ${!formData.mataPelajaran ? "empty" : ""}">${formData.mataPelajaran || "Belum dipilih"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Fase/Kelas</span>
+        <span class="review-value ${!formData.faseKelas ? "empty" : ""}">${formData.faseKelas || "Belum dipilih"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Topik Pembelajaran</span>
+        <span class="review-value ${!formData.topikPembelajaran ? "empty" : ""}">${formData.topikPembelajaran || "Belum diisi"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Alokasi Waktu</span>
+        <span class="review-value ${!formData.alokasiWaktu ? "empty" : ""}">${formData.alokasiWaktu || "Belum diisi"}</span>
+      </div>
+    </div>
+    
+    <div class="review-section">
+      <h3>🎯 Detail Pembelajaran</h3>
+      <div class="review-item">
+        <span class="review-label">Profil Lulusan</span>
+        <span class="review-value ${formData.profilLulusan.length === 0 ? "empty" : ""}">${formData.profilLulusan.length > 0 ? formData.profilLulusan.join(", ") : "Belum dipilih"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Model Pembelajaran</span>
+        <span class="review-value ${!formData.modelPembelajaran ? "empty" : ""}">${formData.modelPembelajaran || "Belum dipilih"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Strategi Pembelajaran</span>
+        <span class="review-value ${!formData.strategiPembelajaran ? "empty" : ""}">${formData.strategiPembelajaran || "Belum dipilih"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Capaian Pembelajaran</span>
+        <span class="review-value ${!formData.tujuanPembelajaran ? "empty" : ""}">${formData.tujuanPembelajaran || "Akan di-generate oleh AI"}</span>
+      </div>
+    </div>
+    
+    <div class="review-section">
+      <h3>📊 Asesmen</h3>
+      <div class="review-item">
+        <span class="review-label">Jenis Asesmen</span>
+        <span class="review-value ${!formData.jenisAsesmen ? "empty" : ""}">${formData.jenisAsesmen || "Belum dipilih"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Bentuk Instrumen</span>
+        <span class="review-value ${!formData.bentukAsesmen ? "empty" : ""}">${formData.bentukAsesmen || "Belum dipilih"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">Konteks Tambahan</span>
+        <span class="review-value ${!formData.contextTambahan ? "empty" : ""}">${formData.contextTambahan || "Tidak ada"}</span>
+      </div>
+      <div class="review-item">
+        <span class="review-label">AI Integration</span>
+        <span class="review-value">${formData.aiIntegrationActivity ? "✅ Aktif" : "❌ Tidak aktif"}</span>
+      </div>
+    </div>
+  `;
+}
 
-          if (currentStep === totalSteps) {
-            generateReviewContent();
-          }
-        }
-      }
+// =====================================================
+// FORM DATA COLLECTION
+// =====================================================
+function getFormData() {
+  return {
+    penyusun: document.getElementById("penyusun").value,
+    instansi: document.getElementById("instansi").value,
+    tahunPenyusunan: document.getElementById("tahunPenyusunan").value,
+    jenjangSekolah: document.getElementById("jenjangSekolah").value,
+    mataPelajaran: document.getElementById("mataPelajaran").value,
+    faseKelas: document.getElementById("faseKelas").value,
+    topikPembelajaran: document.getElementById("topikPembelajaran").value,
+    alokasiWaktu: document.getElementById("alokasiWaktu").value,
+    profilLulusan: selectedDimensions.map((d) => d.value),
+    modelPembelajaran: document.getElementById("modelPembelajaran").value,
+    strategiPembelajaran: document.getElementById("strategiPembelajaran").value,
+    tujuanPembelajaran: document.getElementById("tujuanPembelajaran").value,
+    jenisAsesmen: document.getElementById("jenisAsesmen").value,
+    bentukAsesmen: document.getElementById("bentukAsesmen").value,
+    contextTambahan: document.getElementById("contextTambahan").value,
+    aiIntegrationActivity: document.getElementById("aiIntegrationActivity").checked,
+  };
+}
 
-      function prevStep() {
-        if (currentStep > 1) {
-          currentStep--;
-          updateStepDisplay();
-          updateProgressBar();
-        }
-      }
+// =====================================================
+// FORM SUBMISSION & AI GENERATION
+// =====================================================
+document.getElementById("modulForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  await runGeneration();
+});
 
-      function updateStepDisplay() {
-        document.querySelectorAll(".step-content").forEach((content) => {
-          content.classList.remove("active");
-        });
+async function regenerateModul() {
+  if (!lastFormData) {
+    alert("Tidak ada data sebelumnya. Silakan generate modul terlebih dahulu.");
+    return;
+  }
+  document.getElementById("resultSection").classList.remove("active");
+  document.getElementById("loadingOverlay").classList.add("active");
+  resetProgress();
+  startProgressAnimation();
+  try {
+    const content = await generateModulAjar(lastFormData);
+    stopProgressAnimation();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    displayResult(content);
+    generatedContent = content;
+  } catch (error) {
+    console.error("Error:", error);
+    stopProgressAnimation();
+    alert("Terjadi kesalahan. Silakan coba lagi.");
+  } finally {
+    document.getElementById("loadingOverlay").classList.remove("active");
+  }
+}
 
-        document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.add("active");
+async function runGeneration() {
+  document.getElementById("loadingOverlay").classList.add("active");
+  document.getElementById("resultSection").classList.remove("active");
+  resetProgress();
+  startProgressAnimation();
 
-        document.querySelectorAll(".step-item").forEach((item) => {
-          const itemStep = parseInt(item.dataset.step);
-          item.classList.remove("active", "completed");
+  const formData = getFormData();
+  lastFormData = formData;
 
-          if (itemStep === currentStep) {
-            item.classList.add("active");
-          } else if (itemStep < currentStep) {
-            item.classList.add("completed");
-          }
-        });
+  try {
+    const content = await generateModulAjar(formData);
+    stopProgressAnimation();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    displayResult(content);
+    generatedContent = content;
+  } catch (error) {
+    console.error("Error:", error);
+    stopProgressAnimation();
+    let errorMessage = "Terjadi kesalahan saat menggenerate modul ajar.";
+    if (error.message.includes("API Error")) {
+      errorMessage = `Error API: ${error.message}`;
+    } else if (error.message.includes("network") || error.message.includes("fetch")) {
+      errorMessage = "Masalah koneksi internet. Silakan periksa koneksi Anda dan coba lagi.";
+    }
+    alert(errorMessage);
+  } finally {
+    document.getElementById("loadingOverlay").classList.remove("active");
+  }
+}
 
-        document.getElementById("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+// =====================================================
+// AI MODULE GENERATION
+// =====================================================
+async function generateModulAjar(data) {
 
-      function updateProgressBar() {
-        const progressLine = document.getElementById("progressLine");
-        const percentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
-        const maxWidth = document.querySelector(".progress-steps").offsetWidth - 80;
-        progressLine.style.width = `${(percentage / 100) * maxWidth}px`;
-      }
+  // --- PARSING ALOKASI WAKTU ---
+  const parseAlokasiWaktu = (alokasiWaktu) => {
+    const regex = /(\d+)\s*x\s*(\d+)/i;
+    const match = alokasiWaktu.match(regex);
+    if (match) {
+      const pertemuan = parseInt(match[1]);
+      const menitPerPertemuan = parseInt(match[2]);
+      return {
+        pertemuan,
+        menitPerPertemuan,
+        totalMenit: pertemuan * menitPerPertemuan,
+        pendahuluan: Math.round(menitPerPertemuan * 0.15),
+        inti: Math.round(menitPerPertemuan * 0.7),
+        penutup: Math.round(menitPerPertemuan * 0.15),
+      };
+    }
+    return { pertemuan: 1, menitPerPertemuan: 60, totalMenit: 60, pendahuluan: 10, inti: 40, penutup: 10 };
+  };
 
-      // =====================================================
-      // REVIEW CONTENT GENERATION
-      // =====================================================
-      function generateReviewContent() {
-        const reviewContainer = document.getElementById("reviewContent");
-        const formData = getFormData();
+  const waktuDetail = parseAlokasiWaktu(data.alokasiWaktu);
 
-        reviewContainer.innerHTML = `
-                <div class="review-section">
-                    <h3>📋 Identitas Modul</h3>
-                    <div class="review-item">
-                        <span class="review-label">Penyusun</span>
-                        <span class="review-value ${!formData.penyusun ? "empty" : ""}">${formData.penyusun || "Belum diisi"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Instansi</span>
-                        <span class="review-value ${!formData.instansi ? "empty" : ""}">${formData.instansi || "Belum diisi"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Tahun Penyusunan</span>
-                        <span class="review-value ${!formData.tahunPenyusunan ? "empty" : ""}">${formData.tahunPenyusunan || "Belum dipilih"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Jenjang Sekolah</span>
-                        <span class="review-value ${!formData.jenjangSekolah ? "empty" : ""}">${formData.jenjangSekolah || "Belum dipilih"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Mata Pelajaran</span>
-                        <span class="review-value ${!formData.mataPelajaran ? "empty" : ""}">${formData.mataPelajaran || "Belum dipilih"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Fase/Kelas</span>
-                        <span class="review-value ${!formData.faseKelas ? "empty" : ""}">${formData.faseKelas || "Belum dipilih"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Topik Pembelajaran</span>
-                        <span class="review-value ${!formData.topikPembelajaran ? "empty" : ""}">${formData.topikPembelajaran || "Belum diisi"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Alokasi Waktu</span>
-                        <span class="review-value ${!formData.alokasiWaktu ? "empty" : ""}">${formData.alokasiWaktu || "Belum diisi"}</span>
-                    </div>
-                </div>
-                
-                <div class="review-section">
-                    <h3>🎯 Detail Pembelajaran</h3>
-                    <div class="review-item">
-                        <span class="review-label">Profil Lulusan</span>
-                        <span class="review-value ${formData.profilLulusan.length === 0 ? "empty" : ""}">${formData.profilLulusan.length > 0 ? formData.profilLulusan.join(", ") : "Belum dipilih"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Model Pembelajaran</span>
-                        <span class="review-value ${!formData.modelPembelajaran ? "empty" : ""}">${formData.modelPembelajaran || "Belum dipilih"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Strategi Pembelajaran</span>
-                        <span class="review-value ${!formData.strategiPembelajaran ? "empty" : ""}">${formData.strategiPembelajaran || "Belum dipilih"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Capaian Pembelajaran</span>
-                        <span class="review-value ${!formData.tujuanPembelajaran ? "empty" : ""}">${formData.tujuanPembelajaran || "Akan di-generate oleh AI"}</span>
-                    </div>
-                </div>
-                
-                <div class="review-section">
-                    <h3>📊 Asesmen</h3>
-                    <div class="review-item">
-                        <span class="review-label">Jenis Asesmen</span>
-                        <span class="review-value ${!formData.jenisAsesmen ? "empty" : ""}">${formData.jenisAsesmen || "Belum dipilih"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Bentuk Instrumen</span>
-                        <span class="review-value ${!formData.bentukAsesmen ? "empty" : ""}">${formData.bentukAsesmen || "Belum dipilih"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">Konteks Tambahan</span>
-                        <span class="review-value ${!formData.contextTambahan ? "empty" : ""}">${formData.contextTambahan || "Tidak ada"}</span>
-                    </div>
-                    <div class="review-item">
-                        <span class="review-label">AI Integration</span>
-                        <span class="review-value">${formData.aiIntegrationActivity ? "✅ Aktif" : "❌ Tidak aktif"}</span>
-                    </div>
-                </div>
-            `;
-      }
+  // =====================================================
+  // PETA FASE PER MODEL PEMBELAJARAN
+  // =====================================================
+  const modelFaseMap = {
 
-      // =====================================================
-      // FORM DATA COLLECTION
-      // =====================================================
-      function getFormData() {
-        return {
-          penyusun: document.getElementById("penyusun").value,
-          instansi: document.getElementById("instansi").value,
-          tahunPenyusunan: document.getElementById("tahunPenyusunan").value,
-          jenjangSekolah: document.getElementById("jenjangSekolah").value,
-          mataPelajaran: document.getElementById("mataPelajaran").value,
-          faseKelas: document.getElementById("faseKelas").value,
-          topikPembelajaran: document.getElementById("topikPembelajaran").value,
-          alokasiWaktu: document.getElementById("alokasiWaktu").value,
-          profilLulusan: selectedDimensions.map((d) => d.value),
-          modelPembelajaran: document.getElementById("modelPembelajaran").value,
-          strategiPembelajaran: document.getElementById("strategiPembelajaran").value,
-          tujuanPembelajaran: document.getElementById("tujuanPembelajaran").value,
-          jenisAsesmen: document.getElementById("jenisAsesmen").value,
-          bentukAsesmen: document.getElementById("bentukAsesmen").value,
-          contextTambahan: document.getElementById("contextTambahan").value,
-          aiIntegrationActivity: document.getElementById("aiIntegrationActivity").checked,
-        };
-      }
+    "Problem Based Learning": [
+      { nama: "Fase 1: Orientasi Masalah", bobot: 0.15 },
+      { nama: "Fase 2: Mengorganisasi Peserta Didik", bobot: 0.20 },
+      { nama: "Fase 3: Membimbing Penyelidikan Individu & Kelompok", bobot: 0.25 },
+      { nama: "Fase 4: Mengembangkan & Menyajikan Hasil Karya", bobot: 0.20 },
+      { nama: "Fase 5: Menganalisis & Mengevaluasi Proses Pemecahan Masalah", bobot: 0.20 },
+    ],
 
-      // =====================================================
-      // FORM SUBMISSION & AI GENERATION
-      // =====================================================
-      document.getElementById("modulForm").addEventListener("submit", async function (e) {
-        e.preventDefault();
-        await runGeneration();
-      });
+    "Project Based Learning": [
+      { nama: "Fase 1: Pertanyaan Mendasar", bobot: 0.10 },
+      { nama: "Fase 2: Mendesain Perencanaan Proyek", bobot: 0.15 },
+      { nama: "Fase 3: Menyusun Jadwal Proyek", bobot: 0.10 },
+      { nama: "Fase 4: Memonitor Kemajuan Proyek", bobot: 0.20 },
+      { nama: "Fase 5: Menguji Hasil", bobot: 0.25 },
+      { nama: "Fase 6: Mengevaluasi Pengalaman Belajar", bobot: 0.20 },
+    ],
 
-      // REGENERATE FUNCTION - Generate ulang dengan data yang sama
-      async function regenerateModul() {
-        if (!lastFormData) {
-          alert("Tidak ada data sebelumnya. Silakan generate modul terlebih dahulu.");
-          return;
-        }
+    "Discovery Learning": [
+      { nama: "Fase 1: Stimulasi (Stimulation)", bobot: 0.12 },
+      { nama: "Fase 2: Identifikasi Masalah (Problem Statement)", bobot: 0.15 },
+      { nama: "Fase 3: Pengumpulan Data (Data Collection)", bobot: 0.23 },
+      { nama: "Fase 4: Pengolahan Data (Data Processing)", bobot: 0.20 },
+      { nama: "Fase 5: Pembuktian (Verification)", bobot: 0.15 },
+      { nama: "Fase 6: Generalisasi (Generalization)", bobot: 0.15 },
+    ],
 
-        document.getElementById("resultSection").classList.remove("active");
-        document.getElementById("loadingOverlay").classList.add("active");
-        resetProgress();
-        startProgressAnimation();
+    "Inquiry Learning": [
+      { nama: "Fase 1: Observasi & Merumuskan Pertanyaan", bobot: 0.15 },
+      { nama: "Fase 2: Merumuskan Hipotesis", bobot: 0.15 },
+      { nama: "Fase 3: Mengumpulkan Data & Investigasi", bobot: 0.30 },
+      { nama: "Fase 4: Menganalisis & Menginterpretasi Data", bobot: 0.20 },
+      { nama: "Fase 5: Menyimpulkan & Mengkomunikasikan", bobot: 0.20 },
+    ],
 
-        try {
-          const content = await generateModulAjar(lastFormData);
-          stopProgressAnimation();
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          displayResult(content);
-          generatedContent = content;
-        } catch (error) {
-          console.error("Error:", error);
-          stopProgressAnimation();
-          alert("Terjadi kesalahan. Silakan coba lagi.");
-        } finally {
-          document.getElementById("loadingOverlay").classList.remove("active");
-        }
-      }
+    "Flipped Classroom - Standard": [
+      { nama: "Fase 1: Aktivasi Pengetahuan Pra-Pembelajaran", bobot: 0.15 },
+      { nama: "Fase 2: Klarifikasi & Tanya Jawab", bobot: 0.15 },
+      { nama: "Fase 3: Pembelajaran Aktif & Kolaboratif", bobot: 0.35 },
+      { nama: "Fase 4: Pendalaman & Aplikasi Kontekstual", bobot: 0.20 },
+      { nama: "Fase 5: Refleksi & Umpan Balik", bobot: 0.15 },
+    ],
 
-      async function runGeneration() {
-        document.getElementById("loadingOverlay").classList.add("active");
-        document.getElementById("resultSection").classList.remove("active");
-        resetProgress();
-        startProgressAnimation();
+    "Cooperative Learning - STAD": [
+      { nama: "Fase 1: Penyampaian Tujuan & Motivasi", bobot: 0.10 },
+      { nama: "Fase 2: Pembagian Kelompok Heterogen", bobot: 0.10 },
+      { nama: "Fase 3: Presentasi Materi oleh Guru", bobot: 0.20 },
+      { nama: "Fase 4: Kegiatan Belajar dalam Tim", bobot: 0.30 },
+      { nama: "Fase 5: Kuis Individual", bobot: 0.15 },
+      { nama: "Fase 6: Penghargaan Prestasi Tim", bobot: 0.15 },
+    ],
 
-        const formData = getFormData();
-        lastFormData = formData; // Save for regenerate
+    "Direct Instruction": [
+      { nama: "Fase 1: Menyampaikan Tujuan & Mempersiapkan Siswa", bobot: 0.15 },
+      { nama: "Fase 2: Mendemonstrasikan Pengetahuan & Keterampilan", bobot: 0.25 },
+      { nama: "Fase 3: Membimbing Pelatihan (Guided Practice)", bobot: 0.25 },
+      { nama: "Fase 4: Mengecek Pemahaman & Memberikan Umpan Balik", bobot: 0.20 },
+      { nama: "Fase 5: Latihan Mandiri (Independent Practice)", bobot: 0.15 },
+    ],
 
-        try {
-          const content = await generateModulAjar(formData);
-          stopProgressAnimation();
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          displayResult(content);
-          generatedContent = content;
-        } catch (error) {
-          console.error("Error:", error);
-          stopProgressAnimation();
+  };
 
-          let errorMessage = "Terjadi kesalahan saat menggenerate modul ajar.";
-          if (error.message.includes("API Error")) {
-            errorMessage = `Error API: ${error.message}`;
-          } else if (error.message.includes("network") || error.message.includes("fetch")) {
-            errorMessage = "Masalah koneksi internet. Silakan periksa koneksi Anda dan coba lagi.";
-          }
+  const selectedModel = data.modelPembelajaran || "Discovery Learning";
+  const faseFaseModel = modelFaseMap[selectedModel] ?? modelFaseMap["Discovery Learning"];
 
-          alert(errorMessage);
-        } finally {
-          document.getElementById("loadingOverlay").classList.remove("active");
-        }
-      }
+  const generateFaseRows = (faseFase, waktuInti) => {
+    return faseFase
+      .map((fase) => {
+        const waktuFase = Math.round(waktuInti * fase.bobot);
+        return `
+<tr>
+<td><strong>${fase.nama}</strong></td>
+<td>${waktuFase}'</td>
+<td>[Tulis aktivitas guru yang spesifik dan detail untuk ${fase.nama} pada topik ${data.topikPembelajaran}]</td>
+<td>[Tulis aktivitas siswa yang spesifik dan detail untuk ${fase.nama}]</td>
+<td>🧘 Mindful<br>💡 Meaningful<br>🎉 Joyful</td>
+</tr>`;
+      })
+      .join("\n");
+  };
 
-      // =====================================================
-      // AI MODULE GENERATION - 10000 TOKENS, DETAILED ACTIVITIES
-      // =====================================================
-      async function generateModulAjar(data) {
-        const parseAlokasiWaktu = (alokasiWaktu) => {
-          const regex = /(\d+)\s*x\s*(\d+)/i;
-          const match = alokasiWaktu.match(regex);
-          if (match) {
-            const pertemuan = parseInt(match[1]);
-            const menitPerPertemuan = parseInt(match[2]);
-            return {
-              pertemuan: pertemuan,
-              menitPerPertemuan: menitPerPertemuan,
-              totalMenit: pertemuan * menitPerPertemuan,
-              pendahuluan: Math.round(menitPerPertemuan * 0.15),
-              inti: Math.round(menitPerPertemuan * 0.7),
-              penutup: Math.round(menitPerPertemuan * 0.15),
-            };
-          }
-          return { pertemuan: 1, menitPerPertemuan: 60, totalMenit: 60, pendahuluan: 10, inti: 40, penutup: 10 };
-        };
-
-        const waktuDetail = parseAlokasiWaktu(data.alokasiWaktu);
-
-        const prompt = `Buatkan Modul Ajar Kurikulum Merdeka yang LENGKAP, DETAIL, dan KOMPREHENSIF dengan format HTML. WAJIB mengintegrasikan prinsip DEEP LEARNING (Mindful, Meaningful, Joyful).
+  // =====================================================
+  // PROMPT TEMPLATE
+  // =====================================================
+  const prompt = `Buatkan Modul Ajar Kurikulum Merdeka yang LENGKAP, DETAIL, dan KOMPREHENSIF dengan format HTML. WAJIB mengintegrasikan prinsip DEEP LEARNING (Mindful, Meaningful, Joyful).
 
 DATA PEMBELAJARAN:
 - Penyusun: ${data.penyusun || "Guru"}
@@ -1803,12 +1877,11 @@ DATA PEMBELAJARAN:
 - Jenjang: ${data.jenjangSekolah || "SMP"}
 - Mapel: ${data.mataPelajaran || "IPA"}
 - Fase/Kelas: ${data.faseKelas || "Fase D"}
-- BAB: ${data.bab || "BAB 1"}
 - Topik: ${data.topikPembelajaran || "Pembelajaran"}
 - Alokasi: ${data.alokasiWaktu || "2 x 40 menit"}
 - Waktu: Pendahuluan ${waktuDetail.pendahuluan} menit, Inti ${waktuDetail.inti} menit, Penutup ${waktuDetail.penutup} menit
 - Profil Lulusan: ${data.profilLulusan.length > 0 ? data.profilLulusan.join(", ") : "Penalaran Kritis, Kreativitas"}
-- Model: ${data.modelPembelajaran || "Discovery Learning"}
+- Model: ${selectedModel}
 - Strategi: ${data.strategiPembelajaran || "Diskusi Kelompok"}
 - Capaian: ${data.tujuanPembelajaran || "Generate capaian pembelajaran komprehensif"}
 - Asesmen: ${data.jenisAsesmen || "Formatif dan Sumatif"}
@@ -1820,9 +1893,9 @@ INSTRUKSI PENTING:
 1. SEMUA tabel HARUS menggunakan format yang benar dengan <table>, <tr>, <th>, <td>
 2. KEGIATAN PEMBELAJARAN harus SANGAT DETAIL dengan langkah-langkah spesifik
 3. Setiap fase kegiatan inti harus mencakup: waktu, aktivitas guru, aktivitas siswa, dan integrasi Deep Learning
-4. JANGAN gunakan placeholder atau teks dalam kurung siku
+4. JANGAN gunakan placeholder atau teks dalam kurung siku — isi semua dengan konten nyata
 5. Semua konten harus substantif dan actionable
-6. pada komponen inti jika tidak menggunakan fase 6 maka kosongkan atau kasih -
+6. Kegiatan inti WAJIB menggunakan TEPAT ${faseFaseModel.length} fase sesuai model ${selectedModel}: ${faseFaseModel.map((f) => f.nama).join(", ")}. JANGAN tambah atau kurangi fase.
 
 FORMAT HTML WAJIB:
 
@@ -1839,7 +1912,6 @@ FORMAT HTML WAJIB:
 <tr><td>Jenjang Sekolah</td><td>:</td><td>${data.jenjangSekolah || "SMP"}</td></tr>
 <tr><td>Mata Pelajaran</td><td>:</td><td>${data.mataPelajaran || "IPA"}</td></tr>
 <tr><td>Fase/Kelas</td><td>:</td><td>${data.faseKelas || "Fase D"}</td></tr>
-<tr><td>BAB</td><td>:</td><td>${data.bab || "BAB 1"}</td></tr>
 <tr><td>Topik</td><td>:</td><td>${data.topikPembelajaran || "Pembelajaran"}</td></tr>
 <tr><td>Alokasi Waktu</td><td>:</td><td>${data.alokasiWaktu || "2 x 40 menit"}</td></tr>
 <tr><td>Pendekatan</td><td>:</td><td>Deep Learning (Mindful, Meaningful, Joyful)</td></tr>
@@ -1848,94 +1920,53 @@ FORMAT HTML WAJIB:
 <h3>B. PENDEKATAN DEEP LEARNING</h3>
 <table>
 <tr><th>Aspek</th><th>Deskripsi Implementasi</th></tr>
-<tr><td><strong>🧘 MINDFUL</strong></td><td>[Jelaskan aktivitas refleksi, kesadaran diri, goal setting yang spesifik untuk topik ini]</td></tr>
-<tr><td><strong>💡 MEANINGFUL</strong></td><td>[Jelaskan koneksi dengan kehidupan nyata, aplikasi praktis, relevansi dengan isu terkini]</td></tr>
-<tr><td><strong>🎉 JOYFUL</strong></td><td>[Jelaskan aktivitas menyenangkan: games, tantangan, kolaborasi, kreativitas]</td></tr>
+<tr><td><strong>🧘 MINDFUL</strong></td><td>Jelaskan aktivitas refleksi, kesadaran diri, dan goal setting yang spesifik untuk topik ${data.topikPembelajaran}</td></tr>
+<tr><td><strong>💡 MEANINGFUL</strong></td><td>Jelaskan koneksi dengan kehidupan nyata, aplikasi praktis, dan relevansi topik ${data.topikPembelajaran} dengan isu terkini</td></tr>
+<tr><td><strong>🎉 JOYFUL</strong></td><td>Jelaskan aktivitas menyenangkan: games, tantangan, kolaborasi, dan kreativitas yang relevan dengan topik ${data.topikPembelajaran}</td></tr>
 </table>
 
 <h3>C. KOMPETENSI AWAL</h3>
-[Buat 4 poin kompetensi prasyarat yang spesifik]
+Tuliskan 4 poin kompetensi prasyarat yang spesifik dan terukur untuk topik ${data.topikPembelajaran}
 
 <h3>D. PROFIL LULUSAN YANG DIKEMBANGKAN</h3>
-[Jelaskan bagaimana dimensi ${data.profilLulusan.length > 0 ? data.profilLulusan.join(", ") : "yang dipilih"} dikembangkan]
+Jelaskan secara konkret bagaimana dimensi ${data.profilLulusan.length > 0 ? data.profilLulusan.join(", ") : "Penalaran Kritis, Kreativitas"} dikembangkan melalui pembelajaran topik ${data.topikPembelajaran}
 
 <h3>E. SARANA DAN PRASARANA</h3>
-[Buat daftar media, alat/bahan (utamakan low-cost), dan sumber belajar]
+Buat daftar media, alat/bahan (utamakan low-cost), dan sumber belajar yang spesifik untuk topik ${data.topikPembelajaran}
 
 <h3>F. TARGET PESERTA DIDIK</h3>
-[Deskripsi karakteristik peserta didik]
+Deskripsikan karakteristik peserta didik ${data.faseKelas} yang akan mempelajari topik ${data.topikPembelajaran}
 
 <h3>G. MODEL DAN STRATEGI PEMBELAJARAN</h3>
 <table>
 <tr><th>Komponen</th><th>Deskripsi</th></tr>
-<tr><td>Model</td><td><strong>${data.modelPembelajaran || "Discovery Learning"}</strong> - [penjelasan implementasi]</td></tr>
-<tr><td>Strategi</td><td><strong>${data.strategiPembelajaran || "Diskusi Kelompok"}</strong> - [penjelasan implementasi]</td></tr>
+<tr><td>Model</td><td><strong>${selectedModel}</strong> - Jelaskan implementasi model ini untuk topik ${data.topikPembelajaran} secara konkret</td></tr>
+<tr><td>Strategi</td><td><strong>${data.strategiPembelajaran || "Diskusi Kelompok"}</strong> - Jelaskan implementasi strategi ini secara konkret</td></tr>
 </table>
 
 <h2>KOMPONEN INTI</h2>
 
 <h3>A. CAPAIAN PEMBELAJARAN</h3>
-[Generate capaian pembelajaran komprehensif dengan indikator pencapaian]
+Generate capaian pembelajaran yang komprehensif beserta indikator pencapaian yang terukur untuk topik ${data.topikPembelajaran}
 
 <h3>B. KEGIATAN PEMBELAJARAN</h3>
 
 <h4>KEGIATAN PENDAHULUAN (${waktuDetail.pendahuluan} menit)</h4>
 <table>
 <tr><th>Waktu</th><th>Aktivitas</th><th>Deskripsi Detail</th><th>Deep Learning</th></tr>
-<tr><td>2'</td><td>Pembukaan</td><td>Guru memberi salam dan menyapa peserta didik dengan hangat. Salah satu siswa memimpin doa.</td><td>Mindful</td></tr>
-<tr><td>3'</td><td>Mindful Moment</td><td>[Aktivitas mindfulness spesifik: breathing, intention setting, atau refleksi]</td><td>🧘 Mindful</td></tr>
-<tr><td>3'</td><td>Apersepsi</td><td>[Pertanyaan pemantik yang mengaitkan dengan pengalaman nyata siswa]</td><td>💡 Meaningful</td></tr>
-<tr><td>2'</td><td>Ice Breaker</td><td>[Aktivitas energizer yang fun dan relevan dengan topik]</td><td>🎉 Joyful</td></tr>
-<tr><td>2'</td><td>Tujuan</td><td>Guru menyampaikan tujuan pembelajaran dengan cara yang engaging</td><td>Meaningful</td></tr>
+<tr><td>2'</td><td>Pembukaan</td><td>Guru memberi salam dan menyapa peserta didik dengan hangat. Salah satu siswa memimpin doa.</td><td>🧘 Mindful</td></tr>
+<tr><td>3'</td><td>Mindful Moment</td><td>Isi dengan aktivitas mindfulness spesifik yang relevan dengan topik ${data.topikPembelajaran}: breathing, intention setting, atau refleksi singkat</td><td>🧘 Mindful</td></tr>
+<tr><td>3'</td><td>Apersepsi</td><td>Isi dengan pertanyaan pemantik yang mengaitkan topik ${data.topikPembelajaran} dengan pengalaman nyata siswa sehari-hari</td><td>💡 Meaningful</td></tr>
+<tr><td>2'</td><td>Ice Breaker</td><td>Isi dengan aktivitas energizer yang fun dan relevan dengan topik ${data.topikPembelajaran}</td><td>🎉 Joyful</td></tr>
+<tr><td>2'</td><td>Tujuan Pembelajaran</td><td>Guru menyampaikan tujuan pembelajaran topik ${data.topikPembelajaran} dengan cara yang engaging dan memotivasi siswa</td><td>💡 Meaningful</td></tr>
 </table>
 
 <h4>KEGIATAN INTI (${waktuDetail.inti} menit)</h4>
-<p><strong>Model: ${data.modelPembelajaran || "Discovery Learning"}</strong></p>
+<p><strong>Model: ${selectedModel}</strong> | ${faseFaseModel.length} Fase</p>
 
 <table>
 <tr><th>Fase</th><th>Waktu</th><th>Aktivitas Guru</th><th>Aktivitas Siswa</th><th>Deep Learning</th></tr>
-<tr>
-<td><strong>Fase 1: Stimulasi</strong></td>
-<td>${Math.round(waktuDetail.inti * 0.15)}'</td>
-<td>[Aktivitas guru detail: menampilkan stimulus, memberikan pertanyaan pemandu, membangkitkan rasa ingin tahu]</td>
-<td>[Aktivitas siswa detail: mengamati, merespon, bertanya, mencatat]</td>
-<td>🧘 Refleksi awal<br>💡 Koneksi real-world<br>🎉 Aktivitas engaging</td>
-</tr>
-<tr>
-<td><strong>Fase 2: Identifikasi Masalah</strong></td>
-<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
-<td>[Aktivitas guru: membimbing siswa merumuskan masalah, memberikan scaffolding, monitoring]</td>
-<td>[Aktivitas siswa: berdiskusi, merumuskan pertanyaan, mengidentifikasi variabel]</td>
-<td>🧘 Self-monitoring<br>💡 Problem kontekstual<br>🎉 Kolaborasi aktif</td>
-</tr>
-<tr>
-<td><strong>Fase 3: Pengumpulan Data</strong></td>
-<td>${Math.round(waktuDetail.inti * 0.25)}'</td>
-<td>[Aktivitas guru: memfasilitasi eksplorasi, memberikan resources, membimbing hands-on activity]</td>
-<td>[Aktivitas siswa: melakukan eksperimen/observasi, mengumpulkan informasi, bekerja kolaboratif]</td>
-<td>🧘 Focus & concentration<br>💡 Investigasi autentik<br>🎉 Hands-on learning</td>
-</tr>
-<tr>
-<td><strong>Fase 4: Pengolahan Data</strong></td>
-<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
-<td>[Aktivitas guru: membimbing analisis, mengajukan pertanyaan klarifikasi, memberikan feedback]</td>
-<td>[Aktivitas siswa: menganalisis hasil, membuat kesimpulan, menyusun presentasi]</td>
-<td>🧘 Metacognitive check<br>💡 Critical thinking<br>🎉 Creative expression</td>
-</tr>
-<tr>
-<td><strong>Fase 5: Generalisasi</strong></td>
-<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
-<td>[Aktivitas guru: membantu generalisasi, menghubungkan dengan konteks lain, memberikan penguatan]</td>
-<td>[Aktivitas siswa: mempresentasikan, menanggapi, membuat generalisasi, aplikasi konsep]</td>
-<td>🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration</td>
-</tr>
-<tr>
-<td><strong>fase </strong></td>
-<td>${Math.round(waktuDetail.inti * 0.2)}'</td>
-<td>[Aktivitas Guru: membantu mengevaluasi , menghubungkan dengan konteks lain, memberikan penguatan]</td>
-<td>[Aktivitas Siswa: Refleksi/ mengevaluasi, kembangkan]</td>
-<td>[🧘 Deep reflection<br>💡 Transfer learning<br>🎉 Celebration]</td>
-</tr>
+${generateFaseRows(faseFaseModel, waktuDetail.inti)}
 </table>
 
 ${
@@ -1944,10 +1975,10 @@ ${
 <h4>🤖 INTEGRASI AI DALAM PEMBELAJARAN</h4>
 <table>
 <tr><th>Tahap</th><th>Tools AI</th><th>Aktivitas</th><th>Panduan Prompt</th></tr>
-<tr><td>Eksplorasi</td><td>ChatGPT/Gemini</td><td>Brainstorming ide dan konsep</td><td>"Bantu saya memahami [konsep] dengan analogi sederhana"</td></tr>
-<tr><td>Elaborasi</td><td>Perplexity AI</td><td>Research dan verifikasi</td><td>Siswa mencari sumber terpercaya</td></tr>
-<tr><td>Kreasi</td><td>Canva AI</td><td>Membuat infografis</td><td>Visualisasi hasil pembelajaran</td></tr>
-<tr><td>Refleksi</td><td>Claude AI</td><td>Self-assessment</td><td>"Berikan feedback untuk hasil kerja saya"</td></tr>
+<tr><td>Eksplorasi</td><td>ChatGPT/Gemini</td><td>Brainstorming ide dan konsep terkait ${data.topikPembelajaran}</td><td>"Bantu saya memahami ${data.topikPembelajaran} dengan analogi sederhana"</td></tr>
+<tr><td>Elaborasi</td><td>Perplexity AI</td><td>Research dan verifikasi informasi tentang ${data.topikPembelajaran}</td><td>Siswa mencari sumber terpercaya tentang ${data.topikPembelajaran}</td></tr>
+<tr><td>Kreasi</td><td>Canva AI</td><td>Membuat infografis hasil pembelajaran ${data.topikPembelajaran}</td><td>Visualisasi konsep utama ${data.topikPembelajaran}</td></tr>
+<tr><td>Refleksi</td><td>Claude AI</td><td>Self-assessment hasil belajar ${data.topikPembelajaran}</td><td>"Berikan feedback untuk pemahaman saya tentang ${data.topikPembelajaran}"</td></tr>
 </table>
 <p><strong>Etika AI:</strong> Verifikasi informasi, gunakan sebagai learning partner, berikan kredit yang tepat.</p>
 `
@@ -1957,11 +1988,11 @@ ${
 <h4>KEGIATAN PENUTUP (${waktuDetail.penutup} menit)</h4>
 <table>
 <tr><th>Waktu</th><th>Aktivitas</th><th>Deskripsi Detail</th><th>Deep Learning</th></tr>
-<tr><td>3'</td><td>Refleksi</td><td>[Pertanyaan refleksi mendalam tentang proses dan hasil belajar]</td><td>🧘 Mindful</td></tr>
-<tr><td>2'</td><td>Kesimpulan</td><td>Guru dan siswa bersama merangkum poin penting pembelajaran</td><td>💡 Meaningful</td></tr>
-<tr><td>2'</td><td>Apresiasi</td><td>[Aktivitas apresiasi: tepuk tangan, shout-out, reward]</td><td>🎉 Joyful</td></tr>
-<tr><td>2'</td><td>Preview</td><td>Guru menyampaikan preview menarik pertemuan berikutnya</td><td>Meaningful</td></tr>
-<tr><td>1'</td><td>Penutup</td><td>Doa penutup dan salam</td><td>Mindful</td></tr>
+<tr><td>3'</td><td>Refleksi</td><td>Isi dengan pertanyaan refleksi mendalam tentang proses dan hasil belajar topik ${data.topikPembelajaran}</td><td>🧘 Mindful</td></tr>
+<tr><td>2'</td><td>Kesimpulan</td><td>Guru dan siswa bersama merangkum poin penting pembelajaran ${data.topikPembelajaran}</td><td>💡 Meaningful</td></tr>
+<tr><td>2'</td><td>Apresiasi</td><td>Isi dengan aktivitas apresiasi yang positif: tepuk tangan, shout-out, atau reward sederhana</td><td>🎉 Joyful</td></tr>
+<tr><td>2'</td><td>Preview</td><td>Guru menyampaikan preview menarik tentang materi pertemuan berikutnya</td><td>💡 Meaningful</td></tr>
+<tr><td>1'</td><td>Penutup</td><td>Doa penutup dan salam</td><td>🧘 Mindful</td></tr>
 </table>
 
 <h3>C. ASESMEN</h3>
@@ -1976,7 +2007,7 @@ ${
 <h2>LAMPIRAN</h2>
 
 <h3>A. AKTIVITAS ASESMEN</h3>
-[Generate 3 aktivitas asesmen konkret yang sesuai dengan jenis asesmen yang dipilih]
+Generate 3 aktivitas asesmen konkret yang sesuai dengan ${data.jenisAsesmen} untuk topik ${data.topikPembelajaran}
 
 <h3>B. INSTRUMEN ${(data.bentukAsesmen || "RUBRIK").toUpperCase()}</h3>
 <table>
@@ -1995,153 +2026,137 @@ ${
 <tr><td><strong>🎉 JOYFUL</strong></td><td>Antusiasme luar biasa dan menikmati pembelajaran</td><td>Keterlibatan baik</td><td>Cukup terlibat</td><td>Kurang menunjukkan kegembiraan</td></tr>
 </table>
 
-<h3>D. CONTOH SOAL </h3>
-[Generate Contoh soal minimal 5 sesuai dengan ${data.bentukAsesmen}]
+<h3>D. CONTOH SOAL</h3>
+Generate minimal 5 contoh soal sesuai dengan ${data.bentukAsesmen} untuk topik ${data.topikPembelajaran}
 
-<h3>D. LEMBAR KERJA PESERTA DIDIK</h3>
-[Generate LKPD dengan petunjuk, langkah kerja, dan ruang jawaban]
+<h3>E. LEMBAR KERJA PESERTA DIDIK (LKPD)</h3>
+Generate LKPD lengkap dengan petunjuk pengerjaan, langkah kerja, dan ruang jawaban yang sesuai dengan topik ${data.topikPembelajaran}
 
-PENTING: Generate SEMUA bagian LENGKAP tanpa placeholder. Setiap tabel harus proporsional dan kompak.`;
+PENTING: Generate SEMUA bagian LENGKAP tanpa placeholder. Ganti semua teks instruksi dengan konten nyata yang substantif dan spesifik sesuai topik ${data.topikPembelajaran}.`;
 
-        const response = await fetch("/api/generate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-         body: JSON.stringify({
-            model: "deepseek/deepseek-chat",
-            messages: [
-              {
-                role: "system",
-                content: `Anda adalah ahli pendidikan Indonesia yang sangat berpengalaman dalam menyusun modul ajar Kurikulum Merdeka dengan pendekatan Deep Learning (Mindful, Meaningful, Joyful). 
+  // =====================================================
+  // API CALL
+  // =====================================================
+  const response = await fetch("/api/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "deepseek/deepseek-chat",
+      messages: [
+        {
+          role: "system",
+          content: `Anda adalah ahli pendidikan Indonesia yang sangat berpengalaman dalam menyusun modul ajar Kurikulum Merdeka dengan pendekatan Deep Learning (Mindful, Meaningful, Joyful).
 
 TUGAS UTAMA:
-1. SEMUA tabel HARUS menggunakan format yang benar dengan <table>, <tr>, <th>, <td>
-2. KEGIATAN PEMBELAJARAN harus SANGAT DETAIL dengan langkah-langkah spesifik
+1. SEMUA tabel HARUS menggunakan format <table>, <tr>, <th>, <td>
+2. KEGIATAN PEMBELAJARAN harus SANGAT DETAIL dengan langkah-langkah spesifik dan nyata
 3. Setiap fase kegiatan inti harus mencakup: waktu, aktivitas guru, aktivitas siswa, dan integrasi Deep Learning
-4. JANGAN gunakan placeholder atau teks dalam kurung siku
-5. Semua konten harus substantif dan actionable
-6. pada komponen inti jika tidak menggunakan fase 6 maka kosongkan atau kasih -
+4. JANGAN gunakan placeholder atau teks dalam kurung siku — isi semua dengan konten substantif
+5. Semua konten harus actionable dan langsung bisa digunakan guru
+6. Kegiatan inti WAJIB menggunakan TEPAT ${faseFaseModel.length} fase sesuai model ${selectedModel}: ${faseFaseModel.map((f) => f.nama).join(", ")}. JANGAN tambah atau kurangi fase.
 
 FORMAT TABEL:
 - Gunakan <table>, <tr>, <th>, <td>
 - Header tabel: <th>
 - Konten tabel: <td>
 - Untuk identity table gunakan class="identity-table"`,
-              },
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-            max_tokens: 4000,
-            temperature: 0.7,
-          }),
-        });
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      max_tokens: 4000,
+      temperature: 0.7,
+    }),
+  });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(`OpenAI API Error: ${response.status} - ${errorData.error?.message || "Unknown error"}`);
-        }
+  const result = await response.json();
 
-      const result = await response.json();
+  console.log("===== DEBUG RESPONSE =====");
+  console.log("Status:", response.status);
+  console.log("Result:", result);
+  console.log("==========================");
 
-      console.log("===== DEBUG RESPONSE =====");
-      console.log("Status:", response.status);
-      console.log("Result:", result);
-      console.log("==========================");
-      
-      if (!response.ok) {
-        throw new Error(result?.error?.message || "API Error");
-      }
-      
-      // ✅ Parsing yang benar
-      if (!result?.choices?.[0]?.message?.content) {
-        console.error("Format tidak sesuai:", result);
-        throw new Error("Format response tidak sesuai dari API");
-      }
-      
-      let content = result.choices[0].message.content;
-      
-      // Bersihkan markdown jika ada
-      content = content.replace(/```html\n?/gi, "").replace(/```\n?/gi, "");
-      
-      return content;
+  if (!response.ok) {
+    throw new Error(result?.error?.message || "API Error");
+  }
 
-        // Clean up markdown code blocks if present
-        content = content.replace(/```html\n?/gi, "").replace(/```\n?/gi, "");
+  if (!result?.choices?.[0]?.message?.content) {
+    console.error("Format tidak sesuai:", result);
+    throw new Error("Format response tidak sesuai dari API");
+  }
 
-        return content;
-      }
+  let content = result.choices[0].message.content;
+  content = content.replace(/```html\n?/gi, "").replace(/```\n?/gi, "");
 
-      // =====================================================
-      // RESULT DISPLAY
-      // =====================================================
-      function displayResult(content) {
-        document.getElementById("resultContent").innerHTML = content;
-        document.getElementById("resultSection").classList.add("active");
-        document.getElementById("progressContainer").style.display = "none";
-        document.getElementById("formCard").style.display = "none";
-        document.getElementById("resultSection").scrollIntoView({ behavior: "smooth" });
-      }
+  return content;
+}
 
-      // =====================================================
-      // EXPORT FUNCTIONS
-      // =====================================================
-      function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const contentToExport = document.getElementById("resultContent");
+// =====================================================
+// RESULT DISPLAY
+// =====================================================
+function displayResult(content) {
+  document.getElementById("resultContent").innerHTML = content;
+  document.getElementById("resultSection").classList.add("active");
+  document.getElementById("progressContainer").style.display = "none";
+  document.getElementById("formCard").style.display = "none";
+  document.getElementById("resultSection").scrollIntoView({ behavior: "smooth" });
+}
 
-        html2canvas(contentToExport, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-        }).then((canvas) => {
-          const imgData = canvas.toDataURL("image/jpeg", 0.9);
-          const doc = new jsPDF("p", "mm", "a4");
+// =====================================================
+// EXPORT FUNCTIONS
+// =====================================================
+function exportToPDF() {
+  const { jsPDF } = window.jspdf;
+  const contentToExport = document.getElementById("resultContent");
 
-          const pdfWidth = doc.internal.pageSize.getWidth();
-          const pdfHeight = doc.internal.pageSize.getHeight();
-          const margin = 10;
+  html2canvas(contentToExport, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+  }).then((canvas) => {
+    const imgData = canvas.toDataURL("image/jpeg", 0.9);
+    const doc = new jsPDF("p", "mm", "a4");
 
-          const imgProps = doc.getImageProperties(imgData);
-          const imgWidth = pdfWidth - margin * 2;
-          const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const pdfHeight = doc.internal.pageSize.getHeight();
+    const margin = 10;
 
-          let heightLeft = imgHeight;
-          let position = 0;
+    const imgProps = doc.getImageProperties(imgData);
+    const imgWidth = pdfWidth - margin * 2;
+    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-          doc.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-          heightLeft -= pdfHeight;
+    let heightLeft = imgHeight;
+    let position = 0;
 
-          while (heightLeft > 0) {
-            position -= pdfHeight;
-            doc.addPage();
-            doc.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-            heightLeft -= pdfHeight;
-          }
+    doc.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+    heightLeft -= pdfHeight;
 
-          doc.save("Modul_Ajar_Otomatis.pdf");
-        });
-      }
+    while (heightLeft > 0) {
+      position -= pdfHeight;
+      doc.addPage();
+      doc.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+    }
 
-      function exportToDoc() {
-        // Get the content - keep emoji as is
-        let htmlContent = document.getElementById("resultContent").innerHTML;
+    doc.save("Modul_Ajar_Otomatis.pdf");
+  });
+}
 
-        // Replace table headers with inline styles for Word compatibility
-        htmlContent = htmlContent.replace(/<th>/gi, '<th style="background-color:#1e3a8a;color:#ffffff;font-weight:bold;text-align:center;padding:10px 8px;border:1px solid #1e3a8a;font-family:Segoe UI Emoji, Arial, sans-serif;">');
-        htmlContent = htmlContent.replace(/<th /gi, '<th style="background-color:#1e3a8a;color:#ffffff;font-weight:bold;text-align:center;padding:10px 8px;border:1px solid #1e3a8a;font-family:Segoe UI Emoji, Arial, sans-serif;" ');
+function exportToDoc() {
+  let htmlContent = document.getElementById("resultContent").innerHTML;
 
-        // Fix table cells - include emoji font
-        htmlContent = htmlContent.replace(/<td>/gi, '<td style="border:1px solid #9ca3af;padding:8px 10px;vertical-align:top;font-family:Segoe UI Emoji, Times New Roman, serif;">');
-        htmlContent = htmlContent.replace(/<td /gi, '<td style="border:1px solid #9ca3af;padding:8px 10px;vertical-align:top;font-family:Segoe UI Emoji, Times New Roman, serif;" ');
+  htmlContent = htmlContent.replace(/<th>/gi, '<th style="background-color:#1e3a8a;color:#ffffff;font-weight:bold;text-align:center;padding:10px 8px;border:1px solid #1e3a8a;font-family:Segoe UI Emoji, Arial, sans-serif;">');
+  htmlContent = htmlContent.replace(/<th /gi, '<th style="background-color:#1e3a8a;color:#ffffff;font-weight:bold;text-align:center;padding:10px 8px;border:1px solid #1e3a8a;font-family:Segoe UI Emoji, Arial, sans-serif;" ');
+  htmlContent = htmlContent.replace(/<td>/gi, '<td style="border:1px solid #9ca3af;padding:8px 10px;vertical-align:top;font-family:Segoe UI Emoji, Times New Roman, serif;">');
+  htmlContent = htmlContent.replace(/<td /gi, '<td style="border:1px solid #9ca3af;padding:8px 10px;vertical-align:top;font-family:Segoe UI Emoji, Times New Roman, serif;" ');
+  htmlContent = htmlContent.replace(/<table>/gi, '<table style="width:100%;border-collapse:collapse;margin:12px 0;border:1px solid #1e3a8a;">');
+  htmlContent = htmlContent.replace(/<table /gi, '<table style="width:100%;border-collapse:collapse;margin:12px 0;border:1px solid #1e3a8a;" ');
 
-        // Fix tables
-        htmlContent = htmlContent.replace(/<table>/gi, '<table style="width:100%;border-collapse:collapse;margin:12px 0;border:1px solid #1e3a8a;">');
-        htmlContent = htmlContent.replace(/<table /gi, '<table style="width:100%;border-collapse:collapse;margin:12px 0;border:1px solid #1e3a8a;" ');
-
-        const content = `<!DOCTYPE html>
+  const content = `<!DOCTYPE html>
 <html xmlns:v="urn:schemas-microsoft-com:vml"
 xmlns:o="urn:schemas-microsoft-com:office:office"
 xmlns:w="urn:schemas-microsoft-com:office:word"
@@ -2196,144 +2211,30 @@ xmlns="http://www.w3.org/TR/REC-html40">
 </xml>
 <![endif]-->
 <style>
-/* Page Setup - A4 dengan margin 2.54cm (1 inch) semua sisi */
 @page WordSection1 {
-    size: 595.3pt 841.9pt; /* A4 size */
-    margin: 72.0pt 72.0pt 72.0pt 72.0pt; /* 1 inch = 72pt semua sisi */
+    size: 595.3pt 841.9pt;
+    margin: 72.0pt 72.0pt 72.0pt 72.0pt;
     mso-header-margin: 35.4pt;
     mso-footer-margin: 35.4pt;
     mso-paper-source: 0;
 }
-
-div.WordSection1 {
-    page: WordSection1;
-}
-
-/* Base Styles */
-body {
-    font-family: 'Segoe UI Emoji', 'Times New Roman', Times, serif;
-    font-size: 12pt;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    color: #1e293b;
-    background: #ffffff;
-}
-
-/* Headings */
-h1 {
-    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
-    font-size: 16pt;
-    font-weight: bold;
-    text-align: center;
-    text-transform: uppercase;
-    margin: 20px 0;
-    color: #000000;
-}
-
-h2 {
-    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
-    font-size: 14pt;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin: 20px 0 12px 0;
-    color: #1e3a8a;
-    border-bottom: 2pt solid #1e3a8a;
-    padding-bottom: 5px;
-}
-
-h3 {
-    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
-    font-size: 12pt;
-    font-weight: bold;
-    margin: 15px 0 8px 0;
-    color: #1e3a5f;
-}
-
-h4 {
-    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
-    font-size: 11pt;
-    font-weight: bold;
-    margin: 12px 0 6px 0;
-    color: #374151;
-    background-color: #f0f4f8;
-    padding: 8px 12px;
-    border-left: 4pt solid #1e3a8a;
-}
-
-/* Paragraphs */
-p {
-    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
-    margin-bottom: 10px;
-    text-align: justify;
-}
-
-/* Tables */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 15px 0;
-    border: 1pt solid #1e3a8a;
-}
-
-th {
-    font-family: 'Segoe UI Emoji', Arial, sans-serif;
-    background-color: #1e3a8a;
-    color: #ffffff;
-    font-weight: bold;
-    text-align: center;
-    padding: 10px 8px;
-    border: 1pt solid #1e3a8a;
-    font-size: 10pt;
-    text-transform: uppercase;
-}
-
-td {
-    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
-    border: 1pt solid #9ca3af;
-    padding: 8px 10px;
-    text-align: left;
-    vertical-align: top;
-    font-size: 10pt;
-}
-
-tr:nth-child(even) {
-    background-color: #f8fafc;
-}
-
-/* Identity Table */
-.identity-table {
-    border: 1pt solid #9ca3af;
-}
-
-.identity-table td {
-    border: 1pt solid #d1d5db;
-    padding: 8px 12px;
-}
-
-.identity-table td:first-child {
-    width: 160px;
-    font-weight: bold;
-    background-color: #e5e7eb;
-    color: #1f2937;
-}
-
-/* Lists */
-ul, ol {
-    margin: 12px 0 12px 30px;
-    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
-}
-
-li {
-    margin-bottom: 6px;
-    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
-}
-
-/* Strong and Bold */
-strong, b {
-    font-family: 'Segoe UI Emoji', 'Times New Roman', serif;
-    font-weight: bold;
-}
+div.WordSection1 { page: WordSection1; }
+body { font-family: 'Segoe UI Emoji', 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.6; margin: 0; padding: 0; color: #1e293b; background: #ffffff; }
+h1 { font-family: 'Segoe UI Emoji', 'Times New Roman', serif; font-size: 16pt; font-weight: bold; text-align: center; text-transform: uppercase; margin: 20px 0; color: #000000; }
+h2 { font-family: 'Segoe UI Emoji', 'Times New Roman', serif; font-size: 14pt; font-weight: bold; text-transform: uppercase; margin: 20px 0 12px 0; color: #1e3a8a; border-bottom: 2pt solid #1e3a8a; padding-bottom: 5px; }
+h3 { font-family: 'Segoe UI Emoji', 'Times New Roman', serif; font-size: 12pt; font-weight: bold; margin: 15px 0 8px 0; color: #1e3a5f; }
+h4 { font-family: 'Segoe UI Emoji', 'Times New Roman', serif; font-size: 11pt; font-weight: bold; margin: 12px 0 6px 0; color: #374151; background-color: #f0f4f8; padding: 8px 12px; border-left: 4pt solid #1e3a8a; }
+p { font-family: 'Segoe UI Emoji', 'Times New Roman', serif; margin-bottom: 10px; text-align: justify; }
+table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 1pt solid #1e3a8a; }
+th { font-family: 'Segoe UI Emoji', Arial, sans-serif; background-color: #1e3a8a; color: #ffffff; font-weight: bold; text-align: center; padding: 10px 8px; border: 1pt solid #1e3a8a; font-size: 10pt; text-transform: uppercase; }
+td { font-family: 'Segoe UI Emoji', 'Times New Roman', serif; border: 1pt solid #9ca3af; padding: 8px 10px; text-align: left; vertical-align: top; font-size: 10pt; }
+tr:nth-child(even) { background-color: #f8fafc; }
+.identity-table { border: 1pt solid #9ca3af; }
+.identity-table td { border: 1pt solid #d1d5db; padding: 8px 12px; }
+.identity-table td:first-child { width: 160px; font-weight: bold; background-color: #e5e7eb; color: #1f2937; }
+ul, ol { margin: 12px 0 12px 30px; font-family: 'Segoe UI Emoji', 'Times New Roman', serif; }
+li { margin-bottom: 6px; font-family: 'Segoe UI Emoji', 'Times New Roman', serif; }
+strong, b { font-family: 'Segoe UI Emoji', 'Times New Roman', serif; font-weight: bold; }
 </style>
 </head>
 <body lang=EN-US style='tab-interval:36.0pt'>
@@ -2343,42 +2244,40 @@ ${htmlContent}
 </body>
 </html>`;
 
-        // Add BOM for proper UTF-8 encoding in Word
-        const BOM = "\uFEFF";
-        const blob = new Blob([BOM + content], { type: "application/msword;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "Modul_Ajar_PRIMA.doc";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
+  const BOM = "\uFEFF";
+  const blob = new Blob([BOM + content], { type: "application/msword;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Modul_Ajar_PRIMA.doc";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
-      // =====================================================
-      // RESET & NEW FORM
-      // =====================================================
-      function generateNew() {
-        document.getElementById("resultSection").classList.remove("active");
-        document.getElementById("progressContainer").style.display = "block";
-        document.getElementById("formCard").style.display = "block";
-        document.getElementById("modulForm").reset();
+// =====================================================
+// RESET & NEW FORM
+// =====================================================
+function generateNew() {
+  document.getElementById("resultSection").classList.remove("active");
+  document.getElementById("progressContainer").style.display = "block";
+  document.getElementById("formCard").style.display = "block";
+  document.getElementById("modulForm").reset();
 
-        selectedDimensions = [];
-        updateDimensionsDisplay();
-        lastFormData = null;
+  selectedDimensions = [];
+  updateDimensionsDisplay();
+  lastFormData = null;
 
-        currentStep = 1;
-        updateStepDisplay();
-        updateProgressBar();
+  currentStep = 1;
+  updateStepDisplay();
+  updateProgressBar();
 
-        document.getElementById("tahunPenyusunan").value = new Date().getFullYear().toString();
+  document.getElementById("tahunPenyusunan").value = new Date().getFullYear().toString();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-
-      window.addEventListener("resize", updateProgressBar);
+window.addEventListener("resize", updateProgressBar);
     </script>
   </body>
 </html>
